@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vlog/Models/model.dart';
 import 'package:vlog/Utils/colors.dart';
-import 'package:vlog/vapp/cart/card.dart';
+import 'package:vlog/presentation/cart/card.dart';
 
 class Detail extends StatefulWidget {
   final itemModel ecom;

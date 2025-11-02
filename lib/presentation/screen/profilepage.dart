@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vlog/Models/user_model.dart';
 
 // ---------- MODEL ----------
 class Product {
@@ -16,14 +17,17 @@ class Product {
 }
 
 // ---------- MAIN SCREEN ----------
-class ProfileScreenp extends StatefulWidget {
-  const ProfileScreenp({super.key});
+class ProfileScreen extends StatefulWidget {
+  final String? token;
+  final UserModel? user;
+
+  const ProfileScreen({super.key, this.token, this.user});
 
   @override
-  State<ProfileScreenp> createState() => _ProfileScreenState();
+  State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreenp> {
+class _ProfileScreenState extends State<ProfileScreen> {
   final List<Product> products = [
     Product(
       image: 'assets/man.jpg',

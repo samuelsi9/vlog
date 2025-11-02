@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:vlog/Models/category_model.dart';
 import 'package:vlog/Models/model.dart';
 import 'package:vlog/Utils/colors.dart';
-import 'package:vlog/category_items.dart';
-import 'package:vlog/vapp/detail_screen.dart';
-import 'package:vlog/vapp/widgets/banner.dart';
-import 'package:vlog/vapp/widgets/curatedItems.dart';
+import 'package:vlog/presentation/category_items.dart';
+import 'package:vlog/presentation/screen/detail_screen.dart';
+import 'package:vlog/presentation/banner.dart';
+import 'package:vlog/presentation/curatedItems.dart';
 
 class Realhome extends StatefulWidget {
   const Realhome({super.key});

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:vlog/Models/model.dart';
 import 'package:vlog/Models/category_model.dart';
 import 'package:vlog/Models/subcategory_models.dart';
-import 'package:vlog/vapp/detail_screen.dart'; // Pour aller aux détails
+import 'package:vlog/presentation/screen/detail_screen.dart'; // Pour aller aux détails
 
 class CategoryItems extends StatelessWidget {
   final String category;

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:uni_links/uni_links.dart';
 import 'dart:async';
-import 'package:vlog/vapp/home.dart';
-import 'package:vlog/vapp/widgets/auth/login_page.dart';
-import 'package:vlog/vapp/widgets/auth/reset_password_page.dart';
+import 'package:vlog/presentation/home.dart';
+import 'package:vlog/presentation/auth/login_page.dart';
+import 'package:vlog/presentation/auth/reset_password_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {

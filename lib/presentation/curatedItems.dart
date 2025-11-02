@@ -42,7 +42,7 @@ class Curateditems extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             Text(
-              "H&",
+              "H&M",
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 color: Colors.black26,

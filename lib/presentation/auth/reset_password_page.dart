@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vlog/Data/apiservices.dart';
-import 'package:vlog/vapp/home.dart';
+import 'package:vlog/presentation/home.dart';
 
 class ResetPasswordPage extends StatefulWidget {
   final String resetToken;

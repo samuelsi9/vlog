@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vlog/Data/apiservices.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-import 'package:vlog/vapp/home.dart';
-import 'package:vlog/vapp/widgets/auth/register_page.dart';
-import 'package:vlog/vapp/widgets/auth/forgot_password_page.dart';
+import 'package:vlog/presentation/home.dart';
+import 'package:vlog/presentation/auth/register_page.dart';
+import 'package:vlog/presentation/auth/forgot_password_page.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({super.key});
