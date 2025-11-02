@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:vlog/Models/user_model.dart';
 import 'package:vlog/presentation/screen/profilepage.dart';
 import 'package:vlog/presentation/realhome.dart';
-import 'package:vlog/presentation/screen/profilepage.dart';
+import 'package:vlog/presentation/screen/wishlist_page.dart';
+import 'package:vlog/presentation/screen/search_page.dart';
+import 'package:vlog/presentation/screen/message_page.dart';
 
 class MainScreen extends StatefulWidget {
   final String? token;
@@ -17,7 +18,13 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final List pages = [Realhome(), Scaffold(), Scaffold(), ProfileScreen()];
+    final List pages = [
+      Realhome(),
+      const SearchPage(),
+      const WishlistPage(),
+      const MessagePage(),
+      ProfileScreen(),
+    ];
     print(widget.token);
     return Scaffold(
       backgroundColor: Colors.white,
@@ -35,11 +42,11 @@ class _MainScreenState extends State<MainScreen> {
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: "Search"),
-          BottomNavigationBarItem(icon: Icon(Icons.mail), label: "Message"),
           BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
-            label: " Notification",
+            icon: Icon(Icons.favorite_border),
+            label: "Wishlist",
           ),
+          BottomNavigationBarItem(icon: Icon(Icons.mail), label: "Message"),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_2_outlined),
             label: "Profile",

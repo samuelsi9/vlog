@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:vlog/Models/model.dart';
 import 'package:vlog/Utils/colors.dart';
+import 'package:vlog/Utils/wishlist_service.dart';
+import 'package:vlog/Utils/cart_service.dart';
 import 'package:vlog/presentation/cart/card.dart';
+import 'package:vlog/presentation/screen/cart_page.dart';
 
 class Detail extends StatefulWidget {
   final itemModel ecom;
@@ -16,7 +20,6 @@ class _DetailState extends State<Detail> {
   int currentIndex = 0;
   int selectedColorIndex = 1;
   int selectedSizeIndex = 0;
-  int addflagItemcard = 0;
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -48,12 +51,26 @@ class _DetailState extends State<Detail> {
                           MaterialPageRoute(builder: (_) => ProfileScreen()),
                         );
                       },
-                      child: Text(
-                        " $addflagItemcard",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      child: Consumer<CartService>(
+                        builder: (context, cartService, child) {
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const CartPage(),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              " ${cartService.itemCount}",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ),
@@ -152,7 +169,34 @@ class _DetailState extends State<Detail> {
                       ],
                     ),
                     const Spacer(),
-                    Icon(Icons.favorite_border),
+                    Consumer<WishlistService>(
+                      builder: (context, wishlistService, child) {
+                        final isInWishlist = wishlistService.isInWishlist(
+                          widget.ecom,
+                        );
+                        return InkWell(
+                          onTap: () {
+                            wishlistService.toggleWishlist(widget.ecom);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  isInWishlist
+                                      ? "${widget.ecom.name} removed from wishlist"
+                                      : "${widget.ecom.name} added to wishlist",
+                                ),
+                                duration: const Duration(seconds: 1),
+                              ),
+                            );
+                          },
+                          child: Icon(
+                            isInWishlist
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: isInWishlist ? Colors.red : Colors.black,
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
                 SizedBox(height: 15),
@@ -306,19 +350,29 @@ class _DetailState extends State<Detail> {
                     children: [
                       Icon(Icons.shopping_bag, color: Colors.black),
                       SizedBox(width: 5),
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            addflagItemcard++;
-                          });
+                      Consumer<CartService>(
+                        builder: (context, cartService, child) {
+                          return GestureDetector(
+                            onTap: () {
+                              cartService.addToCart(widget.ecom);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    "${widget.ecom.name} added to cart",
+                                  ),
+                                  duration: const Duration(seconds: 1),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              "ADD TO CART",
+                              style: TextStyle(
+                                color: Colors.black,
+                                letterSpacing: -1,
+                              ),
+                            ),
+                          );
                         },
-                        child: Text(
-                          "ADD TO CART",
-                          style: TextStyle(
-                            color: Colors.black,
-                            letterSpacing: -1,
-                          ),
-                        ),
                       ),
                     ],
                   ),

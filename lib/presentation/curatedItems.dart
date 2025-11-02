@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:vlog/Models/model.dart';
+import 'package:vlog/Utils/wishlist_service.dart';
 
 class Curateditems extends StatelessWidget {
   final itemModel eCommerceItems;
@@ -12,6 +14,9 @@ class Curateditems extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final wishlistService = Provider.of<WishlistService>(context);
+    final isInWishlist = wishlistService.isInWishlist(eCommerceItems);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -29,10 +34,28 @@ class Curateditems extends StatelessWidget {
             padding: EdgeInsets.all(12),
             child: Align(
               alignment: Alignment.topRight,
-              child: CircleAvatar(
-                radius: 18,
-                backgroundColor: Colors.black26,
-                child: Icon(Icons.favorite_border, color: Colors.white),
+              child: InkWell(
+                onTap: () {
+                  wishlistService.toggleWishlist(eCommerceItems);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        isInWishlist
+                            ? "${eCommerceItems.name} removed from wishlist"
+                            : "${eCommerceItems.name} added to wishlist",
+                      ),
+                      duration: const Duration(seconds: 1),
+                    ),
+                  );
+                },
+                child: CircleAvatar(
+                  radius: 18,
+                  backgroundColor: Colors.black26,
+                  child: Icon(
+                    isInWishlist ? Icons.favorite : Icons.favorite_border,
+                    color: isInWishlist ? Colors.red : Colors.white,
+                  ),
+                ),
               ),
             ),
           ),

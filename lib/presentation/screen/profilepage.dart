@@ -1,20 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:vlog/Models/user_model.dart';
-
-// ---------- MODEL ----------
-class Product {
-  final String image;
-  final String title;
-  final double price;
-  final double oldPrice;
-
-  Product({
-    required this.image,
-    required this.title,
-    required this.price,
-    required this.oldPrice,
-  });
-}
+import 'package:vlog/Models/model.dart';
+import 'package:vlog/Utils/cart_service.dart';
+import 'package:vlog/presentation/screen/cart_page.dart';
+import 'package:vlog/presentation/screen/detail_screen.dart';
+import 'package:vlog/presentation/screen/profile_settings_page.dart';
+import 'package:vlog/presentation/screen/settings_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io';
 
 // ---------- MAIN SCREEN ----------
 class ProfileScreen extends StatefulWidget {
@@ -28,105 +22,61 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final List<Product> products = [
-    Product(
-      image: 'assets/man.jpg',
-      title: 'Unisex Green Leather Jacket with Zipper and...',
-      price: 299.99,
-      oldPrice: 399.99,
-    ),
-    Product(
-      image: 'assets/man.jpg',
-      title: 'Unisex Blue Denim Jacket with Button...',
-      price: 279.99,
-      oldPrice: 359.99,
-    ),
-    Product(
-      image: 'assets/man.jpg',
-      title: 'Yellow Winter Jacket with Hood and Zip...',
-      price: 199.99,
-      oldPrice: 299.99,
-    ),
-    Product(
-      image: 'assets/man.jpg',
-      title: 'Nike Air Max - Green Edition',
-      price: 149.99,
-      oldPrice: 199.99,
-    ),
-  ];
+  // Use items from the existing itemModel list
+  List<itemModel> get recentItems => itemC.take(4).toList();
 
-  final List<Product> cart = [];
+  String? _localProfileName;
+  String? _localProfileImagePath;
 
-  void addToCart(Product product) {
-    setState(() {
-      cart.add(product);
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("${product.title} added to cart"),
-        duration: const Duration(seconds: 1),
-      ),
-    );
+  @override
+  void initState() {
+    super.initState();
+    _loadLocalProfile();
   }
 
-  void openCart() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) {
-        return Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                "🛒 Your Cart",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const Divider(),
-              if (cart.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.all(20),
-                  child: Text("Your cart is empty."),
-                )
-              else
-                ...cart.map(
-                  (item) => ListTile(
-                    leading: Image.asset(item.image, height: 40),
-                    title: Text(item.title, maxLines: 1),
-                    subtitle: Text("\$${item.price.toStringAsFixed(2)}"),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete_outline),
-                      onPressed: () {
-                        setState(() {
-                          cart.remove(item);
-                        });
-                        Navigator.pop(context);
-                        openCart();
-                      },
-                    ),
-                  ),
-                ),
-              const SizedBox(height: 10),
-              if (cart.isNotEmpty)
-                ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.payment),
-                  label: const Text("Checkout"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.amber,
-                    foregroundColor: Colors.black,
-                  ),
-                ),
-              const SizedBox(height: 10),
-            ],
-          ),
-        );
-      },
-    );
+  Future<void> _loadLocalProfile() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _localProfileName = prefs.getString('profile_name');
+      _localProfileImagePath = prefs.getString('profile_image_path');
+    });
+  }
+
+  Future<void> _saveProfile(String name, String? imagePath) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('profile_name', name);
+    if (imagePath != null) {
+      await prefs.setString('profile_image_path', imagePath);
+    }
+    setState(() {
+      _localProfileName = name;
+      _localProfileImagePath = imagePath;
+    });
+  }
+
+  String get _displayName {
+    if (_localProfileName != null && _localProfileName!.isNotEmpty) {
+      return _localProfileName!;
+    }
+    return widget.user?.name ?? "Guest User";
+  }
+
+  ImageProvider get _profileImage {
+    // Priority: local image path > user model image > default asset
+    if (_localProfileImagePath != null && _localProfileImagePath!.isNotEmpty) {
+      try {
+        return FileImage(File(_localProfileImagePath!));
+      } catch (e) {
+        // If file doesn't exist, fall back to default
+        return const AssetImage('assets/man.jpg');
+      }
+    }
+    if (widget.user?.image != null &&
+        widget.user!.image.isNotEmpty &&
+        !widget.user!.image.startsWith('assets/')) {
+      return NetworkImage(widget.user!.image);
+    }
+    return const AssetImage('assets/man.jpg');
   }
 
   @override
@@ -139,44 +89,107 @@ class _ProfileScreenState extends State<ProfileScreen> {
             // Header
             Row(
               children: [
-                const CircleAvatar(
-                  radius: 30,
-                  backgroundImage: AssetImage('assets/profile.png'),
+                GestureDetector(
+                  onTap: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ProfileSettingsPage(
+                          currentName: _displayName,
+                          currentImage:
+                              _localProfileImagePath ?? widget.user?.image,
+                          onSave: _saveProfile,
+                        ),
+                      ),
+                    );
+                    // Reload profile after returning
+                    await _loadLocalProfile();
+                  },
+                  child: CircleAvatar(
+                    radius: 30,
+                    backgroundImage: _profileImage,
+                  ),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Grace Opata",
-                        style: TextStyle(
+                        _displayName,
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Text(
-                        "User",
-                        style: TextStyle(fontSize: 13, color: Colors.black54),
+                        widget.user?.role ?? "User",
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.black54,
+                        ),
                       ),
                     ],
                   ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.settings_outlined),
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SettingsPage(),
+                      ),
+                    );
+                  },
                 ),
-                IconButton(
-                  icon: const Icon(Icons.shopping_cart_outlined),
-                  onPressed: openCart,
+                Consumer<CartService>(
+                  builder: (context, cartService, child) {
+                    return Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.shopping_cart_outlined),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const CartPage(),
+                              ),
+                            );
+                          },
+                        ),
+                        if (cartService.itemCount > 0)
+                          Positioned(
+                            right: 8,
+                            top: 8,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: const BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Text(
+                                "${cartService.itemCount}",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
                 ),
               ],
             ),
             const SizedBox(height: 20),
 
             const Text(
-              "More items from your last view",
+              "Recently Viewed",
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
@@ -184,17 +197,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: products.length,
+              itemCount: recentItems.length,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
-                childAspectRatio: 0.8,
+                childAspectRatio: 0.75,
               ),
               itemBuilder: (context, index) {
-                final product = products[index];
+                final item = recentItems[index];
                 return GestureDetector(
-                  onTap: () => addToCart(product),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Detail(ecom: item),
+                      ),
+                    );
+                  },
                   child: Card(
                     elevation: 1,
                     shape: RoundedRectangleBorder(
@@ -208,7 +228,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             top: Radius.circular(16),
                           ),
                           child: Image.asset(
-                            product.image,
+                            item.image,
                             height: 120,
                             width: double.infinity,
                             fit: BoxFit.cover,
@@ -217,7 +237,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         Padding(
                           padding: const EdgeInsets.all(8),
                           child: Text(
-                            product.title,
+                            item.name,
                             style: const TextStyle(fontSize: 13),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -225,38 +245,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Row(
-                            children: [
-                              Text(
-                                "\$${product.price}",
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                "\$${product.oldPrice}",
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
-                                  decoration: TextDecoration.lineThrough,
-                                ),
-                              ),
-                            ],
+                          child: Text(
+                            "\$${item.price}",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.pink,
+                            ),
                           ),
                         ),
                         const Spacer(),
-                        Center(
-                          child: ElevatedButton(
-                            onPressed: () => addToCart(product),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.amber,
-                              foregroundColor: Colors.black,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: const Text("Add to Cart"),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Consumer<CartService>(
+                            builder: (context, cartService, child) {
+                              return SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    cartService.addToCart(item);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          "${item.name} added to cart",
+                                        ),
+                                        duration: const Duration(seconds: 1),
+                                      ),
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.amber,
+                                    foregroundColor: Colors.black,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  child: const Text("Add to Cart"),
+                                ),
+                              );
+                            },
                           ),
                         ),
                         const SizedBox(height: 8),

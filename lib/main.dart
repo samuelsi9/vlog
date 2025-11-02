@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:uni_links/uni_links.dart';
 import 'dart:async';
 import 'package:vlog/presentation/home.dart';
-import 'package:vlog/presentation/auth/login_page.dart';
 import 'package:vlog/presentation/auth/reset_password_page.dart';
+import 'package:vlog/Utils/wishlist_service.dart';
+import 'package:vlog/Utils/cart_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -21,7 +23,6 @@ class _MyAppState extends State<MyApp> {
   StreamSubscription? _sub;
   String? _initialLink;
   bool _initialized = false;
-  bool _isAuthenticated = false;
 
   @override
   void initState() {
@@ -53,9 +54,8 @@ class _MyAppState extends State<MyApp> {
   Future<void> _checkAuth() async {
     if (_initialized) return;
     final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('auth_token');
+    prefs.getString('auth_token');
     setState(() {
-      _isAuthenticated = token != null && token.isNotEmpty;
       _initialized = true;
     });
   }
@@ -109,11 +109,17 @@ class _MyAppState extends State<MyApp> {
         home: Scaffold(body: Center(child: CircularProgressIndicator())),
       );
     }
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: MainScreen(
-        token: null,
-      ), //_isAuthenticated ? MainScreen(token: null) : LoginPage(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => WishlistService()),
+        ChangeNotifierProvider(create: (_) => CartService()),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: MainScreen(
+          token: null,
+        ), //_isAuthenticated ? MainScreen(token: null) : LoginPage(),
+      ),
     );
   }
 }

@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:vlog/Models/category_model.dart';
 import 'package:vlog/Models/model.dart';
 import 'package:vlog/Utils/colors.dart';
+import 'package:vlog/Utils/cart_service.dart';
 import 'package:vlog/presentation/category_items.dart';
 import 'package:vlog/presentation/screen/detail_screen.dart';
 import 'package:vlog/presentation/banner.dart';
 import 'package:vlog/presentation/curatedItems.dart';
+import 'package:vlog/presentation/screen/cart_page.dart';
 
 class Realhome extends StatefulWidget {
   const Realhome({super.key});
@@ -30,31 +33,45 @@ class _RealhomeState extends State<Realhome> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Image.asset("assets/vp.jpg", height: 70),
-                  Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Icon(Icons.shopping_bag, size: 28),
-                      Positioned(
-                        right: -3,
-                        top: -3,
-                        child: Container(
-                          padding: EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: Text(
-                              "3",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
+                  Consumer<CartService>(
+                    builder: (context, cartService, child) {
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const CartPage()),
+                          );
+                        },
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Icon(Icons.shopping_bag, size: 28),
+                            if (cartService.itemCount > 0)
+                              Positioned(
+                                right: -3,
+                                top: -3,
+                                child: Container(
+                                  padding: EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      "${cartService.itemCount}",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 10,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
+                          ],
                         ),
-                      ),
-                    ],
+                      );
+                    },
                   ),
                 ],
               ),

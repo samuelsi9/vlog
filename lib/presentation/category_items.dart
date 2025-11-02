@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:vlog/Models/model.dart';
 import 'package:vlog/Models/category_model.dart';
 import 'package:vlog/Models/subcategory_models.dart';
+import 'package:vlog/Utils/wishlist_service.dart';
 import 'package:vlog/presentation/screen/detail_screen.dart'; // Pour aller aux détails
 
 class CategoryItems extends StatelessWidget {
@@ -238,15 +240,63 @@ class CategoryItems extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Expanded(
-                                child: ClipRRect(
-                                  borderRadius: const BorderRadius.vertical(
-                                    top: Radius.circular(12),
-                                  ),
-                                  child: Image.asset(
-                                    item.image,
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                  ),
+                                child: Stack(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: const BorderRadius.vertical(
+                                        top: Radius.circular(12),
+                                      ),
+                                      child: Image.asset(
+                                        item.image,
+                                        fit: BoxFit.cover,
+                                        width: double.infinity,
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: 8,
+                                      right: 8,
+                                      child: Consumer<WishlistService>(
+                                        builder: (context, wishlistService, child) {
+                                          final isInWishlist = wishlistService
+                                              .isInWishlist(item);
+                                          return InkWell(
+                                            onTap: () {
+                                              wishlistService.toggleWishlist(
+                                                item,
+                                              );
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    isInWishlist
+                                                        ? "${item.name} removed from wishlist"
+                                                        : "${item.name} added to wishlist",
+                                                  ),
+                                                  duration: const Duration(
+                                                    seconds: 1,
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            child: CircleAvatar(
+                                              radius: 16,
+                                              backgroundColor: Colors.black26,
+                                              child: Icon(
+                                                isInWishlist
+                                                    ? Icons.favorite
+                                                    : Icons.favorite_border,
+                                                color: isInWishlist
+                                                    ? Colors.red
+                                                    : Colors.white,
+                                                size: 18,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                               Padding(
