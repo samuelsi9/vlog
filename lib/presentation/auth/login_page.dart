@@ -8,7 +8,7 @@ import 'package:vlog/presentation/auth/register_page.dart';
 import 'package:vlog/presentation/auth/forgot_password_page.dart';
 
 class LoginPage extends StatefulWidget {
-  LoginPage({super.key});
+  const LoginPage({super.key});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -139,13 +139,15 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                       validator: (v) {
-                        if (v == null || v.trim().isEmpty)
+                        if (v == null || v.trim().isEmpty) {
                           return 'Email is required';
+                        }
                         final regex = RegExp(
                           r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
                         );
-                        if (!regex.hasMatch(v.trim()))
+                        if (!regex.hasMatch(v.trim())) {
                           return 'Enter a valid email';
+                        }
                         return null;
                       },
                     ),
@@ -173,8 +175,9 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                       validator: (v) {
-                        if (v == null || v.isEmpty)
+                        if (v == null || v.isEmpty) {
                           return 'Password is required';
+                        }
                         if (v.length < 6) return 'Minimum 6 characters';
                         return null;
                       },

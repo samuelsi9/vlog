@@ -103,8 +103,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 ),
                 validator: (v) {
                   if (v == null || v.isEmpty) return 'Confirm your password';
-                  if (v != _passwordController.text)
+                  if (v != _passwordController.text) {
                     return 'Passwords do not match';
+                  }
                   return null;
                 },
               ),

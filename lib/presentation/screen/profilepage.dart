@@ -200,6 +200,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               itemCount: recentItems.length,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
+
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
                 childAspectRatio: 0.75,
@@ -225,11 +226,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       children: [
                         ClipRRect(
                           borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(16),
+                            top: Radius.circular(19),
                           ),
                           child: Image.asset(
                             item.image,
-                            height: 120,
+                            height: 110,
                             width: double.infinity,
                             fit: BoxFit.cover,
                           ),
@@ -255,7 +256,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         const Spacer(),
                         Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.all(1.0),
                           child: Consumer<CartService>(
                             builder: (context, cartService, child) {
                               return SizedBox(

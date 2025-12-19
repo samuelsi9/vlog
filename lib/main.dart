@@ -3,10 +3,13 @@ import 'package:provider/provider.dart';
 import 'package:uni_links/uni_links.dart';
 import 'dart:async';
 import 'package:vlog/presentation/home.dart';
+import 'package:vlog/presentation/screen/checkout_confirmation_page.dart';
+import 'package:vlog/presentation/screen/order_tracking_page.dart';
 import 'package:vlog/presentation/auth/reset_password_page.dart';
 import 'package:vlog/Utils/wishlist_service.dart';
 import 'package:vlog/Utils/cart_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vlog/presentation/skeleton_loader.dart';
 
 void main() {
   runApp(const MyApp());
@@ -55,6 +58,8 @@ class _MyAppState extends State<MyApp> {
     if (_initialized) return;
     final prefs = await SharedPreferences.getInstance();
     prefs.getString('auth_token');
+    // Simulate loading time to show skeleton
+    await Future.delayed(const Duration(milliseconds: 800));
     setState(() {
       _initialized = true;
     });
@@ -104,9 +109,9 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     if (!_initialized) {
-      return const MaterialApp(
+      return MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: Scaffold(body: Center(child: CircularProgressIndicator())),
+        home: const HomeSkeletonLoader(),
       );
     }
     return MultiProvider(
@@ -116,6 +121,10 @@ class _MyAppState extends State<MyApp> {
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
+        routes: {
+          '/checkout': (context) => const CheckoutConfirmationPage(),
+          '/order-tracking': (context) => const OrderTrackingPage(),
+        },
         home: MainScreen(
           token: null,
         ), //_isAuthenticated ? MainScreen(token: null) : LoginPage(),

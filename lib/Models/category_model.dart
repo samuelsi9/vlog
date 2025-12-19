@@ -6,7 +6,7 @@ class FCategoryModel {
 }
 
 List<FCategoryModel> fcategory = [
-  FCategoryModel(name: "Women", image: 'assets/women.jpg'),
+  FCategoryModel(name: "Women", image: 'assets/fs.jpg'),
   FCategoryModel(name: "Men", image: 'assets/man.jpg'),
   FCategoryModel(name: "Kids", image: 'assets/kids.jpg'),
   FCategoryModel(name: "Shoes", image: 'assets/shoes.jpg'),

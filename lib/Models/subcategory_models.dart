@@ -22,16 +22,17 @@ List<SubCategoryModel> subCategories = [
     id: 1,
     name: "Shoes",
     categoryId: 1, // e.g. Women
-    image: "assets/women.jpg",
+    image: "assets/shoesa.webp",
     items: itemC.where((item) => item.categoryId == 1).toList(),
   ),
   SubCategoryModel(
     id: 2,
     name: "Bags",
     categoryId: 1, // Women
-    image: "assets/women.jpg",
+    image: "assets/bag.jpg",
     items: [],
   ),
+
   SubCategoryModel(
     id: 3,
     name: "Jackets",
