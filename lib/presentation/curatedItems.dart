@@ -83,7 +83,7 @@ class Curateditems extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text(
-                  "\$${eCommerceItems.price.toString()}.00",
+                  "₺${eCommerceItems.price.toString()}.00",
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 18,

@@ -120,15 +120,14 @@ class AuthService {
 
   Future<String> logout({required String resetToken}) async {
     try {
-      final response = await _dio.post(
+      await _dio.post(
         'api/auth/logout',
         data: {'resetToken': resetToken},
       );
-      return "Logged successfly";
+      return "Logged successfully";
     } catch (e) {
-      print('Unexpected error during reset password: $e');
+      print('Unexpected error during logout: $e');
       rethrow;
     }
-    return "";
   }
 }

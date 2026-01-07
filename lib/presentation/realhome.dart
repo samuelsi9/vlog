@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:vlog/Models/category_model.dart';
 import 'package:vlog/Models/model.dart';
 import 'package:vlog/Utils/cart_service.dart';
+import 'package:vlog/Utils/wishlist_service.dart';
 import 'package:vlog/presentation/category_items.dart';
 import 'package:vlog/presentation/screen/detail_screen.dart';
 import 'package:vlog/presentation/screen/cart_page.dart';
@@ -169,7 +170,7 @@ class _RealhomeState extends State<Realhome> {
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
-                                Icons.shopping_bag_outlined,
+                                Icons.shopping_cart_outlined,
                                 size: 22,
                                 color: uberBlack,
                               ),
@@ -303,7 +304,7 @@ class _RealhomeState extends State<Realhome> {
                                     ),
                                   );
                                 },
-                                child: Container(
+                                child: SizedBox(
                                   width: 80,
                                   child: Column(
                                     children: [
@@ -447,53 +448,49 @@ class _RealhomeState extends State<Realhome> {
 
                     const SizedBox(height: 24),
 
-                    // Popular Items section
+                    // Featured deals section
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text(
-                            "Popular Items",
+                            "Featured deals",
                             style: TextStyle(
-                              fontSize: 20,
+                              fontSize: 22,
                               fontWeight: FontWeight.bold,
                               color: uberBlack,
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () {},
-                            child: Text(
-                              "See All",
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: primaryColor,
-                                fontWeight: FontWeight.w600,
-                              ),
+                              letterSpacing: -0.5,
                             ),
                           ),
                         ],
                       ),
                     ),
 
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
 
-                    // Items grid
+                    // Items grid - Featured deals style
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: GridView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 2,
-                              childAspectRatio: 0.75,
-                              crossAxisSpacing: 12,
-                              mainAxisSpacing: 12,
+                              childAspectRatio: 0.58,
+                              crossAxisSpacing: 16,
+                              mainAxisSpacing: 20,
                             ),
                         itemCount: _filteredItems.length,
                         itemBuilder: (context, index) {
                           final eCommerceItems = _filteredItems[index];
+                          // Calculate discount (simulated - 10-30% off)
+                          final discountPercent = (index % 3 + 1) * 10;
+                          final originalPrice = (eCommerceItems.price * 1.15)
+                              .round();
+                          final hasDiscount = discountPercent > 0;
+
                           return InkWell(
                             onTap: () {
                               Navigator.push(
@@ -506,159 +503,313 @@ class _RealhomeState extends State<Realhome> {
                             child: Container(
                               decoration: BoxDecoration(
                                 color: Colors.white,
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.05),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: Colors.grey[200]!,
+                                  width: 1,
+                                ),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // Image
-                                  Expanded(
-                                    flex: 3,
-                                    child: Container(
-                                      width: double.infinity,
-                                      decoration: BoxDecoration(
-                                        borderRadius: const BorderRadius.only(
-                                          topLeft: Radius.circular(12),
-                                          topRight: Radius.circular(12),
-                                        ),
-                                        image: DecorationImage(
-                                          image: AssetImage(
-                                            eCommerceItems.image,
-                                          ),
+                                  // Image with discount badge and wishlist
+                                  Stack(
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius:
+                                            const BorderRadius.vertical(
+                                              top: Radius.circular(16),
+                                            ),
+                                        child: Image.asset(
+                                          eCommerceItems.image,
+                                          height: 130,
+                                          width: double.infinity,
                                           fit: BoxFit.cover,
                                         ),
                                       ),
-                                    ),
+                                      if (hasDiscount)
+                                        Positioned(
+                                          top: 8,
+                                          left: 8,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 4,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: primaryColor,
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                            ),
+                                            child: Text(
+                                              "$discountPercent% off",
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      // Wishlist button
+                                      Positioned(
+                                        top: 8,
+                                        right: 8,
+                                        child: Consumer<WishlistService>(
+                                          builder: (context, wishlistService, child) {
+                                            final isInWishlist = wishlistService
+                                                .isInWishlist(eCommerceItems);
+                                            return InkWell(
+                                              onTap: () {
+                                                wishlistService.toggleWishlist(
+                                                  eCommerceItems,
+                                                );
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(
+                                                      isInWishlist
+                                                          ? "${eCommerceItems.name} removed from wishlist"
+                                                          : "${eCommerceItems.name} added to wishlist",
+                                                    ),
+                                                    duration: const Duration(
+                                                      seconds: 1,
+                                                    ),
+                                                    backgroundColor:
+                                                        primaryColor,
+                                                    behavior: SnackBarBehavior
+                                                        .floating,
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            10,
+                                                          ),
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                              child: Container(
+                                                padding: const EdgeInsets.all(
+                                                  6,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  shape: BoxShape.circle,
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: Colors.black
+                                                          .withOpacity(0.1),
+                                                      blurRadius: 4,
+                                                      offset: const Offset(
+                                                        0,
+                                                        2,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                child: Icon(
+                                                  isInWishlist
+                                                      ? Icons.favorite
+                                                      : Icons.favorite_border,
+                                                  color: isInWishlist
+                                                      ? Colors.red
+                                                      : Colors.grey[700],
+                                                  size: 18,
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                   // Content
                                   Expanded(
-                                    flex: 2,
                                     child: Padding(
-                                      padding: const EdgeInsets.all(12),
+                                      padding: const EdgeInsets.all(10),
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Text(
-                                            eCommerceItems.name,
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w600,
-                                              color: uberBlack,
-                                            ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          Row(
-                                            children: [
-                                              Icon(
-                                                Icons.star,
-                                                color: Colors.amber[700],
-                                                size: 14,
-                                              ),
-                                              const SizedBox(width: 4),
-                                              Text(
-                                                eCommerceItems.rating
-                                                    .toString(),
-                                                style: TextStyle(
-                                                  fontSize: 12,
-                                                  color: Colors.grey[700],
+                                          Flexible(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                // Price section
+                                                Row(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Expanded(
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        mainAxisSize:
+                                                            MainAxisSize.min,
+                                                        children: [
+                                                          if (hasDiscount)
+                                                            Text(
+                                                              "₺${originalPrice}",
+                                                              style: TextStyle(
+                                                                fontSize: 11,
+                                                                color: Colors
+                                                                    .grey[500],
+                                                                decoration:
+                                                                    TextDecoration
+                                                                        .lineThrough,
+                                                              ),
+                                                            ),
+                                                          const SizedBox(
+                                                            height: 2,
+                                                          ),
+                                                          Text(
+                                                            "₺${eCommerceItems.price}",
+                                                            style: TextStyle(
+                                                              fontSize: 16,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              color:
+                                                                  primaryColor,
+                                                              letterSpacing:
+                                                                  -0.5,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    // Add to cart button
+                                                    Consumer<CartService>(
+                                                      builder: (context, cartService, child) {
+                                                        final isInCart =
+                                                            cartService.isInCart(
+                                                              eCommerceItems,
+                                                            );
+                                                        final cartItem =
+                                                            isInCart
+                                                            ? cartService.cartItems.firstWhere(
+                                                                (item) =>
+                                                                    item.item.name ==
+                                                                        eCommerceItems
+                                                                            .name &&
+                                                                    item.item.image ==
+                                                                        eCommerceItems
+                                                                            .image,
+                                                              )
+                                                            : null;
+                                                        return GestureDetector(
+                                                          onTap: () {
+                                                            cartService
+                                                                .addToCart(
+                                                                  eCommerceItems,
+                                                                );
+                                                            ScaffoldMessenger.of(
+                                                              context,
+                                                            ).showSnackBar(
+                                                              SnackBar(
+                                                                content: Text(
+                                                                  "${eCommerceItems.name} added to cart",
+                                                                ),
+                                                                duration:
+                                                                    const Duration(
+                                                                      seconds:
+                                                                          1,
+                                                                    ),
+                                                                backgroundColor:
+                                                                    primaryColor,
+                                                                behavior:
+                                                                    SnackBarBehavior
+                                                                        .floating,
+                                                                shape: RoundedRectangleBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius.circular(
+                                                                        10,
+                                                                      ),
+                                                                ),
+                                                              ),
+                                                            );
+                                                          },
+                                                          child: Container(
+                                                            width: 32,
+                                                            height: 32,
+                                                            decoration: BoxDecoration(
+                                                              color:
+                                                                  primaryColor,
+                                                              borderRadius:
+                                                                  BorderRadius.circular(
+                                                                    8,
+                                                                  ),
+                                                            ),
+                                                            child: Center(
+                                                              child:
+                                                                  isInCart &&
+                                                                      cartItem !=
+                                                                          null
+                                                                  ? Text(
+                                                                      "${cartItem.quantity}",
+                                                                      style: const TextStyle(
+                                                                        color: Colors
+                                                                            .white,
+                                                                        fontSize:
+                                                                            12,
+                                                                        fontWeight:
+                                                                            FontWeight.bold,
+                                                                      ),
+                                                                    )
+                                                                  : const Icon(
+                                                                      Icons.add,
+                                                                      color: Colors
+                                                                          .white,
+                                                                      size: 18,
+                                                                    ),
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                    ),
+                                                  ],
                                                 ),
-                                              ),
-                                              const SizedBox(width: 4),
-                                              Text(
-                                                "(${eCommerceItems.review})",
-                                                style: TextStyle(
-                                                  fontSize: 11,
-                                                  color: Colors.grey[500],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Flexible(
-                                                child: Text(
-                                                  "\$${eCommerceItems.price}",
-                                                  style: TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: primaryColor,
+                                                const SizedBox(height: 6),
+                                                // Product name
+                                                Text(
+                                                  eCommerceItems.name,
+                                                  style: const TextStyle(
+                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: uberBlack,
+                                                    letterSpacing: -0.2,
                                                   ),
+                                                  maxLines: 2,
                                                   overflow:
                                                       TextOverflow.ellipsis,
                                                 ),
-                                              ),
-                                              const SizedBox(width: 8),
-                                              InkWell(
-                                                onTap: () {
-                                                  final cartService =
-                                                      Provider.of<CartService>(
-                                                        context,
-                                                        listen: false,
-                                                      );
-                                                  cartService.addToCart(
-                                                    eCommerceItems,
-                                                  );
-                                                  ScaffoldMessenger.of(
-                                                    context,
-                                                  ).showSnackBar(
-                                                    SnackBar(
-                                                      content: Text(
-                                                        "${eCommerceItems.name} added to cart",
-                                                      ),
-                                                      duration: const Duration(
-                                                        seconds: 1,
-                                                      ),
-                                                      backgroundColor:
-                                                          primaryColor,
-                                                      behavior: SnackBarBehavior
-                                                          .floating,
-                                                      shape: RoundedRectangleBorder(
-                                                        borderRadius:
-                                                            BorderRadius.circular(
-                                                              10,
-                                                            ),
+                                                const SizedBox(height: 4),
+                                                // Rating
+                                                Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.star,
+                                                      color: Colors.amber[700],
+                                                      size: 14,
+                                                    ),
+                                                    const SizedBox(width: 4),
+                                                    Text(
+                                                      "${eCommerceItems.rating.toString()} (${eCommerceItems.review})",
+                                                      style: TextStyle(
+                                                        fontSize: 11,
+                                                        color: Colors.grey[700],
                                                       ),
                                                     ),
-                                                  );
-                                                },
-                                                child: Container(
-                                                  width: 32,
-                                                  height: 32,
-                                                  constraints:
-                                                      const BoxConstraints(
-                                                        minWidth: 32,
-                                                        maxWidth: 32,
-                                                        minHeight: 32,
-                                                        maxHeight: 32,
-                                                      ),
-                                                  decoration: BoxDecoration(
-                                                    color: primaryColor,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          6,
-                                                        ),
-                                                  ),
-                                                  child: const Icon(
-                                                    Icons.add,
-                                                    color: Colors.white,
-                                                    size: 18,
-                                                  ),
+                                                  ],
                                                 ),
-                                              ),
-                                            ],
+                                              ],
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -713,6 +864,36 @@ class _RealhomeState extends State<Realhome> {
           ],
         ),
       ),
+      // Floating cart button - Featured deals style
+      floatingActionButton: Consumer<CartService>(
+        builder: (context, cartService, child) {
+          if (cartService.itemCount == 0) {
+            return const SizedBox.shrink();
+          }
+          return Container(
+            margin: const EdgeInsets.only(bottom: 20),
+            child: FloatingActionButton.extended(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  SmoothPageRoute(child: const CartPage()),
+                );
+              },
+              backgroundColor: uberBlack,
+              icon: const Icon(Icons.shopping_cart, color: Colors.white),
+              label: Text(
+                "View cart (${cartService.itemCount})",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

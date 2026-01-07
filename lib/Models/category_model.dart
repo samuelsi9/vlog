@@ -9,7 +9,7 @@ List<FCategoryModel> fcategory = [
   FCategoryModel(name: "Women", image: 'assets/fs.jpg'),
   FCategoryModel(name: "Men", image: 'assets/man.jpg'),
   FCategoryModel(name: "Kids", image: 'assets/kids.jpg'),
-  FCategoryModel(name: "Shoes", image: 'assets/shoes.jpg'),
+  FCategoryModel(name: "Shoes", image: 'assets/shoesa.webp'),
   FCategoryModel(name: "Accessories", image: 'assets/acces.webp'),
 ];
 

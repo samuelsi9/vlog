@@ -4,14 +4,19 @@ import 'package:uni_links/uni_links.dart';
 import 'dart:async';
 import 'package:vlog/presentation/home.dart';
 import 'package:vlog/presentation/screen/checkout_confirmation_page.dart';
-import 'package:vlog/presentation/screen/order_tracking_page.dart';
 import 'package:vlog/presentation/auth/reset_password_page.dart';
 import 'package:vlog/Utils/wishlist_service.dart';
 import 'package:vlog/Utils/cart_service.dart';
+import 'package:vlog/Utils/delivery_tracking_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vlog/presentation/skeleton_loader.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Note: To enable Google/Apple authentication, you need to:
+  // 1. Set up Firebase: flutter pub add firebase_core && flutterfire configure
+  // 2. Initialize Firebase here: await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // 3. Configure Google Sign-In and Apple Sign-In in Firebase Console
   runApp(const MyApp());
 }
 
@@ -118,13 +123,11 @@ class _MyAppState extends State<MyApp> {
       providers: [
         ChangeNotifierProvider(create: (_) => WishlistService()),
         ChangeNotifierProvider(create: (_) => CartService()),
+        ChangeNotifierProvider(create: (_) => DeliveryTrackingService()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        routes: {
-          '/checkout': (context) => const CheckoutConfirmationPage(),
-          '/order-tracking': (context) => const OrderTrackingPage(),
-        },
+        routes: {'/checkout': (context) => const CheckoutConfirmationPage()},
         home: MainScreen(
           token: null,
         ), //_isAuthenticated ? MainScreen(token: null) : LoginPage(),

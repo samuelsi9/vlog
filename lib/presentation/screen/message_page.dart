@@ -49,7 +49,7 @@ class _MessagePageState extends State<MessagePage> {
       name: 'Seller - Shoes Shop',
       lastMessage: 'Order confirmed',
       time: '2 days ago',
-      avatar: 'assets/shoes.jpg',
+      avatar: 'assets/shoesa.webp',
       isRead: true,
     ),
     Message(

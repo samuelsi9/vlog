@@ -7,6 +7,7 @@ import 'package:vlog/presentation/screen/cart_page.dart';
 import 'package:vlog/presentation/screen/detail_screen.dart';
 import 'package:vlog/presentation/screen/profile_settings_page.dart';
 import 'package:vlog/presentation/screen/settings_page.dart';
+import 'package:vlog/presentation/screen/delivery_tracking_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 
@@ -79,62 +80,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return const AssetImage('assets/man.jpg');
   }
 
+  // Color scheme matching the app
+  static const Color primaryColor = Color(0xFFE53E3E);
+  static const Color primaryColorLight = Color(0xFFFC8181);
+  static const Color uberBlack = Color(0xFF000000);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            // Header
-            Row(
-              children: [
-                GestureDetector(
-                  onTap: () async {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ProfileSettingsPage(
-                          currentName: _displayName,
-                          currentImage:
-                              _localProfileImagePath ?? widget.user?.image,
-                          onSave: _saveProfile,
-                        ),
-                      ),
-                    );
-                    // Reload profile after returning
-                    await _loadLocalProfile();
-                  },
-                  child: CircleAvatar(
-                    radius: 30,
-                    backgroundImage: _profileImage,
+        child: CustomScrollView(
+          slivers: [
+            // Modern header with gradient
+            SliverToBoxAdapter(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [primaryColor, primaryColorLight],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Top bar with settings and cart
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        _displayName,
-                        style: const TextStyle(
-                          fontSize: 18,
+                        const Text(
+                          "Profile",
+                          style: TextStyle(
+                            fontSize: 28,
                           fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        widget.user?.role ?? "User",
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Colors.black54,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                        Row(
+                          children: [
                 IconButton(
-                  icon: const Icon(Icons.settings_outlined),
+                              icon: const Icon(Icons.settings_outlined,
+                                  color: Colors.white),
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -150,7 +137,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       clipBehavior: Clip.none,
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.shopping_cart_outlined),
+                                      icon: const Icon(Icons.shopping_cart_outlined,
+                                          color: Colors.white),
                           onPressed: () {
                             Navigator.push(
                               context,
@@ -167,13 +155,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             child: Container(
                               padding: const EdgeInsets.all(4),
                               decoration: const BoxDecoration(
-                                color: Colors.red,
+                                            color: Colors.white,
                                 shape: BoxShape.circle,
                               ),
                               child: Text(
                                 "${cartService.itemCount}",
-                                style: const TextStyle(
-                                  color: Colors.white,
+                                            style: TextStyle(
+                                              color: primaryColor,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 10,
                                 ),
@@ -186,26 +174,193 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 20),
-
-            const Text(
-              "Recently Viewed",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ],
+                    ),
+                    const SizedBox(height: 30),
+                    // Profile section
+                    GestureDetector(
+                      onTap: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProfileSettingsPage(
+                              currentName: _displayName,
+                              currentImage:
+                                  _localProfileImagePath ?? widget.user?.image,
+                              onSave: _saveProfile,
+                            ),
+                          ),
+                        );
+                        await _loadLocalProfile();
+                      },
+                      child: Column(
+                        children: [
+                          Stack(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 4,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.2),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: CircleAvatar(
+                                  radius: 50,
+                                  backgroundImage: _profileImage,
+                                ),
+                              ),
+                              Positioned(
+                                bottom: 0,
+                                right: 0,
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: const BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.camera_alt,
+                                    color: primaryColor,
+                                    size: 20,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            _displayName,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            widget.user?.role ?? "User",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white.withOpacity(0.9),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            const SizedBox(height: 10),
 
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: recentItems.length,
+            // Menu options section
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Quick Actions",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: uberBlack,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+            _buildMenuOption(
+              context,
+              Icons.local_shipping,
+                      "Delivery Tracking",
+                      "Track your orders in real-time",
+                      primaryColor,
+              () {
+                Navigator.push(
+                  context,
+                          MaterialPageRoute(
+                              builder: (_) => const DeliveryTrackingPage()),
+                        );
+                      },
+                    ),
+                    _buildMenuOption(
+                      context,
+                      Icons.payment,
+                      "Payment Methods",
+                      "Manage your payment options",
+                      Colors.blue,
+                      () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Payment methods coming soon"),
+                          ),
+                        );
+                      },
+                    ),
+                    _buildMenuOption(
+                      context,
+                      Icons.location_on,
+                      "Delivery Addresses",
+                      "Manage your delivery locations",
+                      Colors.green,
+                      () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Addresses coming soon"),
+                          ),
+                        );
+                      },
+                    ),
+                    _buildMenuOption(
+                      context,
+                      Icons.history,
+                      "Order History",
+                      "View your past orders",
+                      Colors.orange,
+                      () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Order history coming soon"),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 32),
+                    const Text(
+                      "Recently Viewed",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: uberBlack,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ),
+
+            // Recently viewed items grid
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              sliver: SliverGrid(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
-                childAspectRatio: 0.75,
+                childAspectRatio: 0.68,
               ),
-              itemBuilder: (context, index) {
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
                 final item = recentItems[index];
                 return GestureDetector(
                   onTap: () {
@@ -216,84 +371,288 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     );
                   },
-                  child: Card(
-                    elevation: 1,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: Colors.grey[200]!,
+                            width: 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.04),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                              spreadRadius: 0,
+                            ),
+                          ],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         ClipRRect(
                           borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(19),
+                                top: Radius.circular(20),
                           ),
-                          child: Image.asset(
+                              child: Stack(
+                                children: [
+                                  Image.asset(
                             item.image,
-                            height: 110,
+                                    height: 120,
                             width: double.infinity,
                             fit: BoxFit.cover,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: Text(
+                                  ),
+                                  Positioned(
+                                    top: 8,
+                                    right: 8,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(6),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.9),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Icon(
+                                        Icons.favorite_border,
+                                        size: 16,
+                                        color: Colors.grey[700],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
                             item.name,
-                            style: const TextStyle(fontSize: 13),
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                            color: uberBlack,
+                                            letterSpacing: -0.2,
+                                          ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Text(
-                            "\$${item.price}",
-                            style: const TextStyle(
+                                        const SizedBox(height: 6),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 5,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.amber[50],
+                                            borderRadius:
+                                                BorderRadius.circular(4),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                Icons.star,
+                                                color: Colors.amber[700],
+                                                size: 11,
+                                              ),
+                                              const SizedBox(width: 2),
+                                              Text(
+                                                item.rating.toString(),
+                                                style: TextStyle(
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Colors.amber[900],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Flexible(
+                                          child: Text(
+                            "₺${item.price}",
+                                            style: TextStyle(
+                                              fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: Colors.pink,
-                            ),
-                          ),
-                        ),
-                        const Spacer(),
-                        Padding(
-                          padding: const EdgeInsets.all(1.0),
-                          child: Consumer<CartService>(
-                            builder: (context, cartService, child) {
-                              return SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton(
-                                  onPressed: () {
+                                              color: primaryColor,
+                                              letterSpacing: -0.5,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        Consumer<CartService>(
+                                          builder:
+                                              (context, cartService, child) {
+                                            return Material(
+                                              color: primaryColor,
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              child: InkWell(
+                                                onTap: () {
                                     cartService.addToCart(item);
-                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
                                       SnackBar(
                                         content: Text(
                                           "${item.name} added to cart",
                                         ),
-                                        duration: const Duration(seconds: 1),
+                                                      duration: const Duration(
+                                                          seconds: 1),
+                                                      backgroundColor:
+                                                          primaryColor,
+                                                      behavior: SnackBarBehavior
+                                                          .floating,
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                                10),
+                                                      ),
                                       ),
                                     );
                                   },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.amber,
-                                    foregroundColor: Colors.black,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  child: const Text("Add to Cart"),
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                                child: Container(
+                                                  width: 36,
+                                                  height: 36,
+                                                  decoration: BoxDecoration(
+                                                    color: primaryColor,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
+                                                  ),
+                                                  child: const Icon(
+                                                    Icons.add,
+                                                    color: Colors.white,
+                                                    size: 18,
+                                                  ),
+                                                ),
                                 ),
                               );
                             },
                           ),
+                                      ],
                         ),
-                        const SizedBox(height: 8),
+                                  ],
+                                ),
+                              ),
+                            ),
                       ],
                     ),
                   ),
                 );
               },
+                  childCount: recentItems.length,
+                ),
+              ),
+            ),
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 20),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenuOption(
+    BuildContext context,
+    IconData icon,
+    String title,
+    String subtitle,
+    Color iconColor,
+    VoidCallback onTap,
+  ) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+      onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+      child: Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Colors.grey[200]!,
+              width: 1,
+            ),
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black.withOpacity(0.03),
+                blurRadius: 10,
+              offset: const Offset(0, 2),
+                spreadRadius: 0,
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+                width: 56,
+                height: 56,
+              decoration: BoxDecoration(
+                  color: iconColor.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(
+                  icon,
+                  color: iconColor,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 20),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                        fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                        color: uberBlack,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                        fontSize: 14,
+                      color: Colors.grey[600],
+                        height: 1.3,
+                      ),
+                  ),
+                ],
+              ),
+            ),
+              const SizedBox(width: 12),
+              Icon(
+                Icons.chevron_right,
+                color: Colors.grey[400],
+                size: 24,
+              ),
+            ],
+          ),
         ),
       ),
     );

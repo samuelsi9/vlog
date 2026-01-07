@@ -126,7 +126,7 @@ class WishlistPage extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                "\$${item.price}.00",
+                                "₺${item.price}.00",
                                 style: const TextStyle(
                                   color: Colors.pink,
                                   fontWeight: FontWeight.w600,

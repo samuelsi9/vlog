@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:vlog/presentation/screen/profilepage.dart';
 import 'package:vlog/presentation/realhome.dart';
 import 'package:vlog/presentation/screen/wishlist_page.dart';
 import 'package:vlog/presentation/screen/search_page.dart';
-import 'package:vlog/presentation/screen/message_page.dart';
+import 'package:vlog/presentation/screen/support_qa_page.dart';
+import 'package:vlog/Utils/delivery_tracking_service.dart';
 
 class MainScreen extends StatefulWidget {
   final String? token;
@@ -17,12 +19,25 @@ class _MainScreenState extends State<MainScreen> {
   int selectedIndex = 0;
 
   @override
+  void initState() {
+    super.initState();
+    // Initialiser les données de démonstration du service de tracking
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final trackingService = Provider.of<DeliveryTrackingService>(
+        context,
+        listen: false,
+      );
+      trackingService.initializeDemoData();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final List pages = [
       Realhome(),
       const SearchPage(),
       const WishlistPage(),
-      const MessagePage(),
+      const SupportQAPage(),
       ProfileScreen(),
     ];
     print(widget.token);
@@ -46,7 +61,10 @@ class _MainScreenState extends State<MainScreen> {
             icon: Icon(Icons.favorite_border),
             label: "Wishlist",
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.mail), label: "Message"),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.help_outline),
+            label: "Support",
+          ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_2_outlined),
             label: "Profile",

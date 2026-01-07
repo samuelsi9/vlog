@@ -316,7 +316,7 @@ class CategoryItems extends StatelessWidget {
                                   horizontal: 8.0,
                                 ),
                                 child: Text(
-                                  "\$${item.price}",
+                                  "₺${item.price}",
                                   style: const TextStyle(color: Colors.black54),
                                 ),
                               ),

@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vlog/Data/apiservices.dart';
 import 'package:vlog/presentation/home.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -27,6 +32,99 @@ class _RegisterPageState extends State<RegisterPage> {
     confirmPasswordController.dispose();
     roleController.dispose();
     super.dispose();
+  }
+
+  Future<void> _signUpWithGoogle() async {
+    try {
+      final GoogleSignIn googleSignIn = GoogleSignIn();
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+      if (googleUser == null) {
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+
+      if (userCredential.user != null) {
+        // Save user data
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('auth_token', userCredential.user!.uid);
+        await prefs.setString('auth_user', jsonEncode({
+          'id': userCredential.user!.uid,
+          'email': userCredential.user!.email,
+          'name': userCredential.user!.displayName,
+        }));
+
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registration with Google successful!')),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => MainScreen(token: userCredential.user!.uid),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Google registration failed: ${e.toString()}')),
+      );
+    }
+  }
+
+  Future<void> _signUpWithApple() async {
+    try {
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      final oauthCredential = OAuthProvider("apple.com").credential(
+        idToken: appleCredential.identityToken,
+        accessToken: appleCredential.authorizationCode,
+      );
+
+      final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(oauthCredential);
+
+      if (userCredential.user != null) {
+        // Save user data
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('auth_token', userCredential.user!.uid);
+        await prefs.setString('auth_user', jsonEncode({
+          'id': userCredential.user!.uid,
+          'email': userCredential.user!.email ?? appleCredential.email,
+          'name': userCredential.user!.displayName ?? 
+                  '${appleCredential.givenName ?? ''} ${appleCredential.familyName ?? ''}'.trim(),
+        }));
+
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registration with Apple successful!')),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => MainScreen(token: userCredential.user!.uid),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Apple registration failed: ${e.toString()}')),
+      );
+    }
   }
 
   String? _validateFirstName(String? value) {
@@ -435,9 +533,33 @@ class _RegisterPageState extends State<RegisterPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.g_mobiledata, size: 40),
-                        const SizedBox(width: 25),
-                        Icon(Icons.apple, size: 40),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _signUpWithGoogle,
+                            icon: const Icon(Icons.g_mobiledata),
+                            label: const Text('Google'),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _signUpWithApple,
+                            icon: const Icon(Icons.apple),
+                            label: const Text('Apple'),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 30),

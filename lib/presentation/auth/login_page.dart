@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vlog/Data/apiservices.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 import 'package:vlog/presentation/home.dart';
 import 'package:vlog/presentation/auth/register_page.dart';
 import 'package:vlog/presentation/auth/forgot_password_page.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -69,15 +71,97 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  Future<void> _launchOAuth(String provider) async {
-    final auth = AuthService();
-    final url = auth.getOAuthInitiationUrl(provider);
-    if (await canLaunchUrlString(url)) {
-      await launchUrlString(url);
-    } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Cannot launch $provider auth')));
+  Future<void> _signInWithGoogle() async {
+    try {
+      final GoogleSignIn googleSignIn = GoogleSignIn();
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+      if (googleUser == null) {
+        // User cancelled the sign-in
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+
+      if (userCredential.user != null) {
+        // Save user data
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('auth_token', userCredential.user!.uid);
+        await prefs.setString('auth_user', jsonEncode({
+          'id': userCredential.user!.uid,
+          'email': userCredential.user!.email,
+          'name': userCredential.user!.displayName,
+        }));
+
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Google sign-in successful')),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => MainScreen(token: userCredential.user!.uid),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Google sign-in failed: ${e.toString()}')),
+      );
+    }
+  }
+
+  Future<void> _signInWithApple() async {
+    try {
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      final oauthCredential = OAuthProvider("apple.com").credential(
+        idToken: appleCredential.identityToken,
+        accessToken: appleCredential.authorizationCode,
+      );
+
+      final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(oauthCredential);
+
+      if (userCredential.user != null) {
+        // Save user data
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('auth_token', userCredential.user!.uid);
+        await prefs.setString('auth_user', jsonEncode({
+          'id': userCredential.user!.uid,
+          'email': userCredential.user!.email ?? appleCredential.email,
+          'name': userCredential.user!.displayName ?? 
+                  '${appleCredential.givenName ?? ''} ${appleCredential.familyName ?? ''}'.trim(),
+        }));
+
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Apple sign-in successful')),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => MainScreen(token: userCredential.user!.uid),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Apple sign-in failed: ${e.toString()}')),
+      );
     }
   }
 
@@ -238,7 +322,7 @@ class _LoginPageState extends State<LoginPage> {
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () => _launchOAuth('google'),
+                      onPressed: _signInWithGoogle,
                       icon: const Icon(Icons.g_mobiledata),
                       label: const Text('Google'),
                       style: OutlinedButton.styleFrom(
@@ -252,9 +336,9 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () => _launchOAuth('facebook'),
-                      icon: const Icon(Icons.facebook),
-                      label: const Text('Facebook'),
+                      onPressed: _signInWithApple,
+                      icon: const Icon(Icons.apple),
+                      label: const Text('Apple'),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(

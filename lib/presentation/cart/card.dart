@@ -47,25 +47,25 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final List<Product> products = [
     Product(
-      image: 'assets/jacket1.png',
+      image: 'assets/bag.jpg',
       title: 'Unisex Green Leather Jacket with Zipper and...',
       price: 299.99,
       oldPrice: 399.99,
     ),
     Product(
-      image: 'assets/jacket2.png',
+      image: 'assets/bags.webp',
       title: 'Unisex Blue Denim Jacket with Button...',
       price: 279.99,
       oldPrice: 359.99,
     ),
     Product(
-      image: 'assets/jacket3.png',
+      image: 'assets/shoesa.webp',
       title: 'Yellow Winter Jacket with Hood and Zip...',
       price: 199.99,
       oldPrice: 299.99,
     ),
     Product(
-      image: 'assets/shoes.png',
+      image: 'assets/shoesa.webp',
       title: 'Nike Air Max - Green Edition',
       price: 149.99,
       oldPrice: 199.99,
@@ -114,7 +114,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   (item) => ListTile(
                     leading: Image.asset(item.image, height: 40),
                     title: Text(item.title, maxLines: 1),
-                    subtitle: Text("\$${item.price.toStringAsFixed(2)}"),
+                    subtitle: Text("₺${item.price.toStringAsFixed(2)}"),
                     trailing: IconButton(
                       icon: const Icon(Icons.delete_outline),
                       onPressed: () {
@@ -158,7 +158,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 const CircleAvatar(
                   radius: 30,
-                  backgroundImage: AssetImage('assets/profile.png'),
+                  backgroundImage: AssetImage('assets/man.jpg'),
                 ),
                 const SizedBox(width: 12),
                 const Expanded(
@@ -245,14 +245,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: Row(
                             children: [
                               Text(
-                                "\$${product.price}",
+                                "₺${product.price}",
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                "\$${product.oldPrice}",
+                                "₺${product.oldPrice}",
                                 style: const TextStyle(
                                   fontSize: 12,
                                   color: Colors.grey,
