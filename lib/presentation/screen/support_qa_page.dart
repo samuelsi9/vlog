@@ -150,7 +150,7 @@ class _SupportQAPageState extends State<SupportQAPage> {
                   const SizedBox(height: 12),
                   // Category dropdown
                   DropdownButtonFormField<String>(
-                    value: _selectedCategory,
+                    initialValue: _selectedCategory,
                     decoration: InputDecoration(
                       labelText: 'Category',
                       border: OutlineInputBorder(
@@ -282,7 +282,7 @@ class _SupportQAPageState extends State<SupportQAPage> {
                           ],
                         ),
                       );
-                    }).toList(),
+                    }),
                   ],
                 ),
               ),

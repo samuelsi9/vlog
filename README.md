@@ -1,38 +1,391 @@
-# VLog - E-Commerce Shopping App
+# VLog - Food & Product Delivery App
 
-A modern Flutter-based e-commerce application similar to Walmart, designed for seamless online shopping experiences. Users can browse products, add items to cart, place orders, and manage their accounts with ease.
+A comprehensive Flutter-based delivery application that combines e-commerce shopping with restaurant food delivery. Users can browse products, order from restaurants, track deliveries in real-time, and manage their accounts seamlessly.
 
-## 📱 Features
+## 📱 About the App
 
-### 🛍️ Shopping Experience
-- **Product Browsing**: Browse through various product categories
-- **Search Functionality**: Search for products by name or description
-- **Product Details**: View detailed product information, ratings, and reviews
-- **Shopping Cart**: Add/remove items, adjust quantities
-- **Wishlist**: Save favorite products for later
-- **Minimum Order**: $50 minimum order requirement for checkout
+**VLog** is a modern delivery app that serves as both an e-commerce platform and a food delivery service. The app allows users to:
+- Shop for products from various categories
+- Order food from multiple restaurants
+- Track deliveries in real-time
+- Manage orders, addresses, and payment methods
+- Access customer support and FAQs
 
-### 🔐 Authentication
-- **Email/Password**: Traditional email and password registration and login
-- **Google Sign-In**: Quick authentication using Google account
-- **Apple Sign-In**: Seamless authentication for iOS users (requires Apple Developer account)
-- **Account Management**: Profile settings, account deletion
+## 🏗️ App Architecture
 
-### 💳 Order Management
-- **Checkout Process**: Secure checkout with delivery details
-- **Order Tracking**: Track your orders in real-time
-- **Order History**: View past orders
-- **Order Confirmation**: Beautiful success confirmation after order placement
+### Data Models (8 Total)
 
-### 💬 Customer Support
-- **FAQ Section**: Frequently asked questions with answers
-- **Question Submission**: Submit questions to customer support team
-- **Category-based Support**: Questions organized by categories (Orders, Shipping, Returns, Products, Payment, Account)
+The app uses **8 data models** to structure and manage data:
 
-### 🎨 User Interface
-- **Modern Design**: Clean and intuitive UI with smooth animations
-- **Responsive Layout**: Optimized for different screen sizes
-- **Dark Mode Ready**: UI components support theming
+1. **`category_model.dart`** - Product categories and subcategories
+2. **`delivery_address_model.dart`** - User delivery addresses with location data
+3. **`menu_item_model.dart`** - Restaurant menu items and food products
+4. **`model.dart`** - General product/item models for e-commerce items
+5. **`order_model.dart`** - Order structure with items, status, payment, and delivery info
+6. **`restaurant_model.dart`** - Restaurant information, ratings, and delivery details
+7. **`subcategory_models.dart`** - Subcategory classifications for products
+8. **`user_model.dart`** - User profile and account information
+
+## 📺 Screen Documentation
+
+### 🏠 Main Navigation Screens
+
+#### 1. **MainScreen (Home Navigation)**
+- **Location**: `lib/presentation/home.dart`
+- **Purpose**: Main navigation hub with bottom navigation bar
+- **Features**:
+  - Bottom navigation with 5 tabs: Home, Search, Wishlist, Support, Profile
+  - Manages navigation between main app sections
+  - Initializes delivery tracking service
+
+#### 2. **Realhome (Home Screen)**
+- **Location**: `lib/presentation/realhome.dart`
+- **Purpose**: Main home screen displaying products and categories
+- **Features**:
+  - Product categories grid
+  - Featured products carousel
+  - Product cards with images, prices, and ratings
+  - Quick access to product details
+  - Shopping cart integration
+  - Smooth page transitions
+
+#### 3. **SearchPage**
+- **Location**: `lib/presentation/screen/search_page.dart`
+- **Purpose**: Search functionality for products and items
+- **Features**:
+  - Real-time search with filtering
+  - Search history
+  - Product suggestions
+  - Category-based search
+
+#### 4. **WishlistPage**
+- **Location**: `lib/presentation/screen/wishlist_page.dart`
+- **Purpose**: Manage saved favorite products
+- **Features**:
+  - View all wishlisted items
+  - Remove items from wishlist
+  - Quick add to cart from wishlist
+  - Empty state handling
+
+#### 5. **SupportQAPage**
+- **Location**: `lib/presentation/screen/support_qa_page.dart`
+- **Purpose**: Customer support and FAQ section
+- **Features**:
+  - Categorized FAQs (Orders, Shipping, Returns, Products, Payment, Account)
+  - Question submission form
+  - Search within FAQs
+  - Contact support options
+
+#### 6. **ProfileScreen**
+- **Location**: `lib/presentation/screen/profilepage.dart`
+- **Purpose**: User profile and account management
+- **Features**:
+  - User profile display with avatar
+  - Quick actions: Delivery Tracking, Payment Methods, Addresses, Order History
+  - Recently viewed products
+  - Settings access
+  - Shopping cart access
+
+---
+
+### 🔐 Authentication Screens
+
+#### 7. **LoginPage**
+- **Location**: `lib/presentation/auth/login_page.dart`
+- **Purpose**: User login authentication
+- **Features**:
+  - Email/password login
+  - Google Sign-In integration
+  - Apple Sign-In integration (iOS)
+  - Forgot password link
+  - Registration navigation
+
+#### 8. **RegisterPage**
+- **Location**: `lib/presentation/auth/register_page.dart`
+- **Purpose**: New user registration
+- **Features**:
+  - Email/password registration
+  - Social authentication options
+  - Form validation
+  - Terms and conditions
+
+#### 9. **ForgotPasswordPage**
+- **Location**: `lib/presentation/auth/forgot_password_page.dart`
+- **Purpose**: Password recovery initiation
+- **Features**:
+  - Email input for password reset
+  - Reset link sending
+  - Success confirmation
+
+#### 10. **ResetPasswordPage**
+- **Location**: `lib/presentation/auth/reset_password_page.dart`
+- **Purpose**: Password reset with token
+- **Features**:
+  - Token-based password reset
+  - New password confirmation
+  - Deep link handling
+
+---
+
+### 🛍️ Shopping & Product Screens
+
+#### 11. **DetailScreen (Product Detail)**
+- **Location**: `lib/presentation/screen/detail_screen.dart`
+- **Purpose**: Detailed product information view
+- **Features**:
+  - Product images gallery
+  - Product description and specifications
+  - Price and rating display
+  - Size and color options
+  - Add to cart functionality
+  - Add to wishlist
+  - Quantity selector
+
+#### 12. **CartPage**
+- **Location**: `lib/presentation/screen/cart_page.dart`
+- **Purpose**: Shopping cart management
+- **Features**:
+  - View all cart items
+  - Update quantities
+  - Remove items
+  - Subtotal calculation
+  - Delivery fee display
+  - Total price calculation
+  - Proceed to checkout
+
+#### 13. **CategoryItems**
+- **Location**: `lib/presentation/category_items.dart`
+- **Purpose**: Display products by category
+- **Features**:
+  - Category-based product listing
+  - Grid/list view options
+  - Product filtering
+  - Quick product access
+
+---
+
+### 🍔 Restaurant & Food Delivery Screens
+
+#### 14. **RestaurantsHomePage**
+- **Location**: `lib/presentation/restaurants/restaurants_home_page.dart`
+- **Purpose**: Browse available restaurants
+- **Features**:
+  - Restaurant listings with ratings
+  - Filter by cuisine type
+  - Search restaurants
+  - Delivery time estimates
+  - Restaurant images and details
+
+#### 15. **RestaurantDetailPage**
+- **Location**: `lib/presentation/restaurants/restaurant_detail_page.dart`
+- **Purpose**: Individual restaurant information and menu
+- **Features**:
+  - Restaurant information display
+  - Menu categories
+  - Menu items listing
+  - Add items to cart
+  - Delivery fee and time
+  - Restaurant ratings and reviews
+
+#### 16. **MenuItemDetailPage**
+- **Location**: `lib/presentation/restaurants/menu_item_detail_page.dart`
+- **Purpose**: Detailed food item information
+- **Features**:
+  - Food item images
+  - Description and ingredients
+  - Customization options
+  - Price and size options
+  - Add to cart
+  - Special instructions
+
+#### 17. **RestaurantCartPage**
+- **Location**: `lib/presentation/screen/restaurant_cart_page.dart`
+- **Purpose**: Cart for restaurant orders
+- **Features**:
+  - Restaurant-specific cart
+  - Menu item management
+  - Quantity adjustments
+  - Special instructions per item
+
+#### 18. **RestaurantSearchPage**
+- **Location**: `lib/presentation/restaurants/restaurant_search_page.dart`
+- **Purpose**: Search for restaurants
+- **Features**:
+  - Restaurant search functionality
+  - Filter by location, cuisine, rating
+  - Quick restaurant access
+
+---
+
+### 💳 Checkout & Order Screens
+
+#### 19. **CheckoutConfirmationPage**
+- **Location**: `lib/presentation/screen/checkout_confirmation_page.dart`
+- **Purpose**: Final checkout and order placement
+- **Features**:
+  - Order summary review
+  - Delivery details confirmation
+  - **Delivery schedule selection (REQUIRED)**
+  - Payment method selection
+  - Order notes
+  - **Minimum order validation (₺2000)**
+  - Order confirmation dialog
+  - Receipt generation
+
+#### 20. **DeliverySchedulePage**
+- **Location**: `lib/presentation/screen/delivery_schedule_page.dart`
+- **Purpose**: Select delivery date and time
+- **Features**:
+  - Calendar date picker
+  - Time slot selection
+  - Available delivery windows
+  - Schedule confirmation
+
+#### 21. **ReceiptPage**
+- **Location**: `lib/presentation/screen/receipt_page.dart`
+- **Purpose**: Order receipt display
+- **Features**:
+  - Order details
+  - Itemized list
+  - Pricing breakdown
+  - Delivery information
+  - Order number
+  - Print/share options
+
+#### 22. **OrdersHistoryPage (Transaction History)**
+- **Location**: `lib/presentation/screen/orders_history_page.dart`
+- **Purpose**: View all past orders and transactions
+- **Features**:
+  - Complete order history
+  - Statistics dashboard (Total Orders, Completed, Total Spent)
+  - Filter by status (All, Pending, Completed, Cancelled)
+  - Order details with status
+  - Quick order tracking access
+  - Empty state handling
+  - Pull-to-refresh
+
+#### 23. **OrderTrackingPage**
+- **Location**: `lib/presentation/screen/order_tracking_page.dart`
+- **Purpose**: Track individual order status
+- **Features**:
+  - Order status timeline
+  - Current order stage
+  - Estimated delivery time
+  - Order details
+  - Contact support option
+
+#### 24. **DeliveryTrackingPage**
+- **Location**: `lib/presentation/screen/delivery_tracking_page.dart`
+- **Purpose**: Real-time delivery tracking
+- **Features**:
+  - Live delivery map
+  - Delivery route visualization
+  - Driver location tracking
+  - Delivery progress stages
+  - Estimated arrival time
+  - Contact driver option
+
+---
+
+### 👤 Profile & Settings Screens
+
+#### 25. **ProfileSettingsPage**
+- **Location**: `lib/presentation/screen/profile_settings_page.dart`
+- **Purpose**: Edit user profile information
+- **Features**:
+  - Update profile name
+  - Change profile picture
+  - Image picker integration
+  - Save profile changes
+
+#### 26. **SettingsPage**
+- **Location**: `lib/presentation/screen/settings_page.dart`
+- **Purpose**: App and account settings
+- **Features**:
+  - Account settings
+  - Notification preferences
+  - Language settings
+  - Delete account option
+  - Logout functionality
+
+---
+
+### 📍 Address Management Screens
+
+#### 27. **DeliveryAddressPage**
+- **Location**: `lib/presentation/restaurants/delivery_address_page.dart`
+- **Purpose**: Manage delivery addresses
+- **Features**:
+  - List of saved addresses
+  - Set default address
+  - Edit/delete addresses
+  - Add new address
+
+#### 28. **AddEditAddressPage**
+- **Location**: `lib/presentation/restaurants/add_edit_address_page.dart`
+- **Purpose**: Add or edit delivery address
+- **Features**:
+  - Address form (street, city, postal code, country)
+  - Location picker
+  - Address validation
+  - Save address
+
+---
+
+### 💬 Support & Communication Screens
+
+#### 29. **MessagePage**
+- **Location**: `lib/presentation/screen/message_page.dart`
+- **Purpose**: Customer support messaging
+- **Features**:
+  - Message list
+  - Support conversations
+  - New message creation
+
+#### 30. **ChatDetailPage**
+- **Location**: `lib/presentation/screen/chat_detail_page.dart`
+- **Purpose**: Individual chat conversation
+- **Features**:
+  - Message thread
+  - Send/receive messages
+  - Support agent communication
+  - File attachments
+
+---
+
+## 🎯 Key Features
+
+### Order Requirements
+- **Minimum Order Amount**: ₺2000 (including delivery fees)
+- **Delivery Schedule**: **REQUIRED** - Users must select delivery date and time before checkout
+- Visual warnings and validation messages guide users
+
+### Order Management
+- Complete order history with filtering
+- Real-time order tracking
+- Delivery status updates
+- Order statistics dashboard
+
+### Shopping Features
+- Product browsing by category
+- Search functionality
+- Wishlist management
+- Shopping cart with quantity management
+- Product details with images and specifications
+
+### Restaurant Features
+- Restaurant browsing and search
+- Menu viewing
+- Food item customization
+- Restaurant-specific cart
+- Delivery time estimates
+
+### User Management
+- Profile management with photo upload
+- Multiple delivery addresses
+- Order history access
+- Settings and preferences
+- Account deletion option
 
 ## 🚀 Getting Started
 
@@ -69,11 +422,6 @@ A modern Flutter-based e-commerce application similar to Walmart, designed for s
    flutterfire configure
    ```
 
-   Follow the prompts to:
-   - Select your Firebase project
-   - Choose platforms (iOS, Android, Web)
-   - Firebase will generate `firebase_options.dart`
-
 4. **Initialize Firebase in main.dart**
 
    After running `flutterfire configure`, uncomment the Firebase initialization in `lib/main.dart`:
@@ -90,23 +438,6 @@ A modern Flutter-based e-commerce application similar to Walmart, designed for s
      runApp(const MyApp());
    }
    ```
-
-5. **Configure Google Sign-In**
-
-   - **Android**: Add your app's SHA-1 fingerprint to Firebase Console
-     ```bash
-     keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
-     ```
-   
-   - **iOS**: Add your iOS bundle ID in Firebase Console and download `GoogleService-Info.plist`
-   
-   - **Web**: Add your domain to Firebase Console authorized domains
-
-6. **Configure Apple Sign-In** (iOS only)
-
-   - Enable Sign in with Apple in your Apple Developer account
-   - Configure Apple Sign-In in Firebase Console
-   - Add the Sign in with Apple capability in Xcode
 
 ## 📦 Dependencies
 
@@ -166,62 +497,97 @@ flutter build web --release
 lib/
 ├── Data/
 │   └── apiservices.dart          # API services
-├── Models/
-│   ├── model.dart                # Product models
+├── Models/                       # 8 Data Models
 │   ├── category_model.dart       # Category models
+│   ├── delivery_address_model.dart # Delivery address models
+│   ├── menu_item_model.dart      # Menu item models
+│   ├── model.dart                # Product/item models
 │   ├── order_model.dart          # Order models
+│   ├── restaurant_model.dart     # Restaurant models
+│   ├── subcategory_models.dart   # Subcategory models
 │   └── user_model.dart           # User models
 ├── presentation/
-│   ├── auth/
-│   │   ├── login_page.dart       # Login screen
-│   │   ├── register_page.dart    # Registration screen
+│   ├── auth/                     # Authentication screens
+│   │   ├── login_page.dart
+│   │   ├── register_page.dart
 │   │   ├── forgot_password_page.dart
 │   │   └── reset_password_page.dart
-│   ├── screen/
-│   │   ├── cart_page.dart        # Shopping cart
+│   ├── restaurants/              # Restaurant screens
+│   │   ├── restaurants_home_page.dart
+│   │   ├── restaurant_detail_page.dart
+│   │   ├── menu_item_detail_page.dart
+│   │   ├── checkout_page.dart
+│   │   ├── delivery_address_page.dart
+│   │   └── add_edit_address_page.dart
+│   ├── screen/                   # Main app screens
+│   │   ├── cart_page.dart
 │   │   ├── checkout_confirmation_page.dart
-│   │   ├── detail_screen.dart    # Product details
-│   │   ├── search_page.dart      # Search functionality
-│   │   ├── wishlist_page.dart    # Wishlist
-│   │   ├── support_qa_page.dart  # Support & Q&A
-│   │   ├── profilepage.dart      # User profile
-│   │   └── settings_page.dart    # App settings
+│   │   ├── detail_screen.dart
+│   │   ├── search_page.dart
+│   │   ├── wishlist_page.dart
+│   │   ├── support_qa_page.dart
+│   │   ├── profilepage.dart
+│   │   ├── settings_page.dart
+│   │   ├── orders_history_page.dart
+│   │   ├── order_tracking_page.dart
+│   │   ├── delivery_tracking_page.dart
+│   │   ├── delivery_schedule_page.dart
+│   │   ├── receipt_page.dart
+│   │   └── ...
 │   ├── home.dart                 # Main navigation
 │   ├── realhome.dart             # Home screen
 │   └── curatedItems.dart         # Product cards
 └── Utils/
     ├── cart_service.dart         # Cart state management
     ├── wishlist_service.dart     # Wishlist management
-    └── delivery_tracking_service.dart
+    ├── order_service.dart        # Order management
+    └── delivery_tracking_service.dart # Delivery tracking
 ```
 
 ## ✨ Key Features Details
 
 ### Minimum Order Amount
-- Users must have at least $50 in their cart (including delivery fees) to proceed to checkout
+- Users must have at least **₺2000** in their cart (including delivery fees) to proceed to checkout
 - Visual indicators show remaining amount needed
 - Checkout button is disabled until minimum is met
+- Warning messages guide users
 
-### Account Deletion
-- Users can delete their account from Settings
-- Two-step confirmation process for security
-- All user data is permanently deleted
-- Includes: profile, orders, addresses, wishlist
+### Delivery Schedule Requirement
+- **MANDATORY**: Users must select a delivery date and time before confirming order
+- Visual indicators (red border, asterisk) show required field
+- Validation prevents checkout without schedule selection
+- Warning messages if schedule not selected
 
-### Order Confirmation
-- Beautiful success dialog after order placement
-- Shows order total and confirmation details
-- Email confirmation notification
-- Automatic cart clearing after successful order
+### Order History & Tracking
+- Complete transaction history with statistics
+- Filter orders by status (All, Pending, Completed, Cancelled)
+- Real-time order tracking
+- Delivery status updates
+- Order details and receipts
+
+### Account Management
+- Profile customization with photo upload
+- Multiple delivery addresses
+- Order history access
+- Settings and preferences
+- Account deletion option
 
 ## 🔧 Configuration
+
+### App Constants
+- **Minimum order amount**: ₺2000.00 (defined in checkout page)
+- **Delivery fee**: ₺250 (configurable)
+- **Delivery schedule**: Required before checkout
 
 ### Environment Variables
 - Firebase configuration is handled through `firebase_options.dart` (generated by FlutterFire CLI)
 
-### App Constants
-- Minimum order amount: $50.00 (defined in cart and checkout pages)
-- Delivery fee: $2.99 (configurable in cart service)
+## 📊 App Statistics
+
+- **Total Screens**: 30+ screens
+- **Data Models**: 8 models
+- **Main Features**: E-commerce shopping + Restaurant delivery
+- **Navigation Tabs**: 5 main sections (Home, Search, Wishlist, Support, Profile)
 
 ## 🤝 Contributing
 
@@ -261,6 +627,8 @@ For support, email your-email@example.com or create an issue in the repository.
 - [ ] Product recommendations
 - [ ] Live chat support
 - [ ] Order cancellation and returns
+- [ ] Real-time driver tracking
+- [ ] Multiple payment methods
 
 ---
 

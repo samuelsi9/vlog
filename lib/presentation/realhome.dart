@@ -655,7 +655,7 @@ class _RealhomeState extends State<Realhome> {
                                                         children: [
                                                           if (hasDiscount)
                                                             Text(
-                                                              "₺${originalPrice}",
+                                                              "₺$originalPrice",
                                                               style: TextStyle(
                                                                 fontSize: 11,
                                                                 color: Colors

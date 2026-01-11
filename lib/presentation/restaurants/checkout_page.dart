@@ -119,7 +119,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         ],
                       ),
                     );
-                  }).toList(),
+                  }),
                   const Divider(),
                   const SizedBox(height: 8),
                   _buildPriceRow("Sous-total", subtotal),
@@ -407,5 +407,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 }
+
+
+
+
 
 

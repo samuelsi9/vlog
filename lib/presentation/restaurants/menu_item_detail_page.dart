@@ -189,7 +189,7 @@ class _MenuItemDetailPageState extends State<MenuItemDetailPage> {
                   if (widget.menuItem.variations.isNotEmpty)
                     ...widget.menuItem.variations.map((variation) {
                       return _buildVariationSection(variation);
-                    }).toList(),
+                    }),
                   
                   const SizedBox(height: 100),
                 ],
@@ -357,7 +357,7 @@ class _MenuItemDetailPageState extends State<MenuItemDetailPage> {
                 ),
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );
@@ -382,5 +382,9 @@ class _MenuItemDetailPageState extends State<MenuItemDetailPage> {
     );
   }
 }
+
+
+
+
 
 

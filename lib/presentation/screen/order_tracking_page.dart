@@ -160,7 +160,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
                         ],
                       ),
                     );
-                  }).toList(),
+                  }),
                   const Divider(),
                   const SizedBox(height: 8),
                   _buildPriceRow("Sous-total", order.subtotal),
@@ -326,7 +326,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
                         ],
                       ),
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ),

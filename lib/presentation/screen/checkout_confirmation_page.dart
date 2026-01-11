@@ -36,12 +36,11 @@ class _CheckoutConfirmationPageState extends State<CheckoutConfirmationPage> {
   }
 
   void _placeOrder(BuildContext context) {
-    // No validation needed since fields are pre-filled
-
     final cart = Provider.of<CartService>(context, listen: false);
-    const double minimumOrderAmount = 50.0;
+    const double minimumOrderAmount = 2000.0;
     final double totalWithDelivery = cart.totalPrice + 250;
     
+    // Validate minimum order amount
     if (totalWithDelivery < minimumOrderAmount) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -50,6 +49,20 @@ class _CheckoutConfirmationPageState extends State<CheckoutConfirmationPage> {
           ),
           backgroundColor: Colors.orange,
           duration: const Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+
+    // Validate delivery schedule is selected
+    if (_selectedDeliveryDate == null || _selectedDeliveryTime == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Please select a delivery date and time before proceeding.',
+          ),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 3),
         ),
       );
       return;
@@ -527,19 +540,21 @@ class _CheckoutConfirmationPageState extends State<CheckoutConfirmationPage> {
                                   color: Colors.grey[50],
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
-                                    color: _selectedDeliveryDate != null
+                                    color: _selectedDeliveryDate != null && _selectedDeliveryTime != null
                                         ? primaryColor
-                                        : Colors.grey[300]!,
-                                    width: _selectedDeliveryDate != null ? 2 : 1,
+                                        : Colors.red[300]!,
+                                    width: _selectedDeliveryDate != null && _selectedDeliveryTime != null ? 2 : 1.5,
                                   ),
                                 ),
                                 child: Row(
                                   children: [
                                     Icon(
-                                      Icons.calendar_today,
-                                      color: _selectedDeliveryDate != null
+                                      _selectedDeliveryDate != null && _selectedDeliveryTime != null
+                                          ? Icons.calendar_today
+                                          : Icons.calendar_today_outlined,
+                                      color: _selectedDeliveryDate != null && _selectedDeliveryTime != null
                                           ? primaryColor
-                                          : Colors.grey[600],
+                                          : Colors.red[600],
                                       size: 20,
                                     ),
                                     const SizedBox(width: 12),
@@ -551,25 +566,26 @@ class _CheckoutConfirmationPageState extends State<CheckoutConfirmationPage> {
                                             _selectedDeliveryDate != null &&
                                                     _selectedDeliveryTime != null
                                                 ? '${_formatDate(_selectedDeliveryDate!)} • $_selectedDeliveryTime'
-                                                : 'Select delivery date and time',
+                                                : 'Select delivery date and time *',
                                             style: TextStyle(
                                               fontSize: 15,
-                                              fontWeight: _selectedDeliveryDate != null
+                                              fontWeight: _selectedDeliveryDate != null && _selectedDeliveryTime != null
                                                   ? FontWeight.w600
                                                   : FontWeight.normal,
-                                              color: _selectedDeliveryDate != null
+                                              color: _selectedDeliveryDate != null && _selectedDeliveryTime != null
                                                   ? Colors.black87
-                                                  : Colors.grey[600],
+                                                  : Colors.red[700],
                                             ),
                                           ),
-                                          if (_selectedDeliveryDate == null)
+                                          if (_selectedDeliveryDate == null || _selectedDeliveryTime == null)
                                             const SizedBox(height: 4),
-                                          if (_selectedDeliveryDate == null)
+                                          if (_selectedDeliveryDate == null || _selectedDeliveryTime == null)
                                             Text(
-                                              'Choose when you want your order delivered',
+                                              'Required: Choose when you want your order delivered',
                                               style: TextStyle(
                                                 fontSize: 12,
-                                                color: Colors.grey[500],
+                                                color: Colors.red[600],
+                                                fontWeight: FontWeight.w500,
                                               ),
                                             ),
                                         ],
@@ -577,7 +593,9 @@ class _CheckoutConfirmationPageState extends State<CheckoutConfirmationPage> {
                                     ),
                                     Icon(
                                       Icons.chevron_right,
-                                      color: Colors.grey[400],
+                                      color: _selectedDeliveryDate != null && _selectedDeliveryTime != null
+                                          ? Colors.grey[400]
+                                          : Colors.red[400],
                                     ),
                                   ],
                                 ),
@@ -716,14 +734,16 @@ class _CheckoutConfirmationPageState extends State<CheckoutConfirmationPage> {
                         ),
                       ),
 
-                      // Minimum order amount warning
+                      // Validation warnings
                       Builder(
                         builder: (context) {
-                          const double minimumOrderAmount = 50.0;
+                          const double minimumOrderAmount = 2000.0;
                           final double totalWithDelivery = cart.totalPrice + 250;
-                          final bool canPlaceOrder = totalWithDelivery >= minimumOrderAmount;
+                          final bool meetsMinimumAmount = totalWithDelivery >= minimumOrderAmount;
+                          final bool hasDeliverySchedule = _selectedDeliveryDate != null && _selectedDeliveryTime != null;
 
-                          if (!canPlaceOrder) {
+                          // Show minimum amount warning
+                          if (!meetsMinimumAmount) {
                             final double remainingAmount = minimumOrderAmount - totalWithDelivery;
                             return Container(
                               padding: const EdgeInsets.all(16),
@@ -764,6 +784,49 @@ class _CheckoutConfirmationPageState extends State<CheckoutConfirmationPage> {
                               ),
                             );
                           }
+
+                          // Show delivery schedule warning
+                          if (!hasDeliverySchedule) {
+                            return Container(
+                              padding: const EdgeInsets.all(16),
+                              margin: const EdgeInsets.only(bottom: 16),
+                              decoration: BoxDecoration(
+                                color: Colors.red[50],
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.red[200]!),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.schedule, color: Colors.red[700], size: 24),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Delivery Schedule Required',
+                                          style: TextStyle(
+                                            color: Colors.red[900],
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          'Please select a delivery date and time to proceed',
+                                          style: TextStyle(
+                                            color: Colors.red[800],
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+
                           return const SizedBox.shrink();
                         },
                       ),
@@ -810,9 +873,20 @@ class _CheckoutConfirmationPageState extends State<CheckoutConfirmationPage> {
                       ),
                       child: Builder(
                         builder: (context) {
-                          const double minimumOrderAmount = 50.0;
+                          const double minimumOrderAmount = 2000.0;
                           final double totalWithDelivery = cart.totalPrice + 250;
-                          final bool canPlaceOrder = totalWithDelivery >= minimumOrderAmount && cart.cartItems.isNotEmpty;
+                          final bool meetsMinimumAmount = totalWithDelivery >= minimumOrderAmount;
+                          final bool hasDeliverySchedule = _selectedDeliveryDate != null && _selectedDeliveryTime != null;
+                          final bool canPlaceOrder = meetsMinimumAmount && 
+                                                     hasDeliverySchedule && 
+                                                     cart.cartItems.isNotEmpty;
+
+                          String buttonText = 'Place Order';
+                          if (!meetsMinimumAmount) {
+                            buttonText = 'Minimum: ₺${minimumOrderAmount.toStringAsFixed(2)}';
+                          } else if (!hasDeliverySchedule) {
+                            buttonText = 'Select Delivery Time';
+                          }
 
                           return Material(
                             color: Colors.transparent,
@@ -824,15 +898,13 @@ class _CheckoutConfirmationPageState extends State<CheckoutConfirmationPage> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(
-                                      Icons.check_circle_outline,
+                                      canPlaceOrder ? Icons.check_circle_outline : Icons.warning_amber_rounded,
                                       color: canPlaceOrder ? Colors.white : Colors.grey[400],
                                       size: 22,
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
-                                      canPlaceOrder
-                                          ? 'Place Order'
-                                          : 'Minimum order: ₺${minimumOrderAmount.toStringAsFixed(2)}',
+                                      buttonText,
                                       style: TextStyle(
                                         color: canPlaceOrder ? Colors.white : Colors.grey[400],
                                         fontSize: 18,

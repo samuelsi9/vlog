@@ -174,7 +174,7 @@ List<itemModel> itemC = [
   itemModel(
     name: "oil  1lt ",
     description: "new model ",
-    price: 345,
+    price: 305,
     categoryId: 2,
     image: 'assets/olive.png',
     rating: 2.3,
@@ -229,7 +229,7 @@ List<itemModel> itemC = [
   itemModel(
     name: "Nutella",
     description: "new model ",
-    price: 345,
+    price: 305,
     categoryId: 1,
     image: 'assets/shoesa.webp',
     rating: 2.3,
@@ -306,7 +306,7 @@ List<itemModel> itemC = [
   itemModel(
     name: "Çokokrem 400 Gram ",
     description: "new model ",
-    price: 450,
+    price: 500,
     categoryId: 1,
     image: 'assets/chocolate.webp',
     rating: 2.3,

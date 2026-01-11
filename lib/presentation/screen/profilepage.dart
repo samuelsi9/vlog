@@ -8,6 +8,7 @@ import 'package:vlog/presentation/screen/detail_screen.dart';
 import 'package:vlog/presentation/screen/profile_settings_page.dart';
 import 'package:vlog/presentation/screen/settings_page.dart';
 import 'package:vlog/presentation/screen/delivery_tracking_page.dart';
+import 'package:vlog/presentation/screen/orders_history_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 
@@ -326,9 +327,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       "View your past orders",
                       Colors.orange,
                       () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Order history coming soon"),
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const OrdersHistoryPage(),
                           ),
                         );
                       },

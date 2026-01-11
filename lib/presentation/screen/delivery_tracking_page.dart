@@ -711,7 +711,7 @@ class _DeliveryTrackingPageState extends State<DeliveryTrackingPage> {
                       ],
                     ),
                   );
-                }).toList(),
+                }),
               ],
             ),
           ),

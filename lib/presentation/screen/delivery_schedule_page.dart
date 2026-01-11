@@ -22,7 +22,7 @@ class DeliverySchedulePage extends StatefulWidget {
 class _DeliverySchedulePageState extends State<DeliverySchedulePage> {
   DateTime? _selectedDate;
   String? _selectedTimeSlot;
-  final List<String> _timeSlots = [
+  final List<String> _allTimeSlots = [
     '9:00 AM - 11:00 AM',
     '11:00 AM - 1:00 PM',
     '1:00 PM - 3:00 PM',
@@ -31,11 +31,78 @@ class _DeliverySchedulePageState extends State<DeliverySchedulePage> {
     '7:00 PM - 9:00 PM',
   ];
 
+  // Get available time slots based on selected date and current time
+  List<String> get _availableTimeSlots {
+    if (_selectedDate == null) return _allTimeSlots;
+    
+    final now = DateTime.now();
+    final isToday = _isToday(_selectedDate!);
+    
+    // If selected date is in the future, show all time slots
+    if (!isToday) {
+      return _allTimeSlots;
+    }
+    
+    // If today, filter out past time slots
+    final currentHour = now.hour;
+    final currentMinute = now.minute;
+    
+    return _allTimeSlots.where((slot) {
+      // Extract start hour from time slot (e.g., "9:00 AM" from "9:00 AM - 11:00 AM")
+      final startTimeStr = slot.split(' - ')[0];
+      final slotHour = _parseTimeTo24Hour(startTimeStr);
+      
+      // If slot hour is greater than current hour, it's available
+      if (slotHour > currentHour) {
+        return true;
+      }
+      
+      // If slot hour equals current hour, check minutes
+      if (slotHour == currentHour) {
+        // Extract minutes from time string (default to 0 if not specified)
+        final minutesMatch = RegExp(r':(\d+)').firstMatch(startTimeStr);
+        final slotMinutes = minutesMatch != null ? int.parse(minutesMatch.group(1)!) : 0;
+        
+        // Only show if slot minutes are in the future
+        return slotMinutes > currentMinute;
+      }
+      
+      return false;
+    }).toList();
+  }
+
+  // Convert time string (e.g., "9:00 AM") to 24-hour format hour
+  int _parseTimeTo24Hour(String timeStr) {
+    final isPM = timeStr.contains('PM');
+    final timeMatch = RegExp(r'(\d+):(\d+)').firstMatch(timeStr);
+    
+    if (timeMatch == null) return 0;
+    
+    int hour = int.parse(timeMatch.group(1)!);
+    
+    // Convert to 24-hour format
+    if (isPM && hour != 12) {
+      hour += 12;
+    } else if (!isPM && hour == 12) {
+      hour = 0;
+    }
+    
+    return hour;
+  }
+
   @override
   void initState() {
     super.initState();
     _selectedDate = widget.initialDate ?? DateTime.now();
     _selectedTimeSlot = widget.initialTimeSlot;
+    
+    // If initial time slot is not available (past time), clear it
+    if (_selectedTimeSlot != null && _selectedDate != null) {
+      final availableSlots = _getAvailableTimeSlotsForDate(_selectedDate!);
+      if (!availableSlots.contains(_selectedTimeSlot)) {
+        _selectedTimeSlot = null;
+      }
+    }
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -60,6 +127,13 @@ class _DeliverySchedulePageState extends State<DeliverySchedulePage> {
     if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
+        // Clear selected time slot if it becomes unavailable for the new date
+        if (_selectedTimeSlot != null) {
+          final availableSlots = _getAvailableTimeSlotsForDate(picked);
+          if (!availableSlots.contains(_selectedTimeSlot)) {
+            _selectedTimeSlot = null;
+          }
+        }
       });
     }
   }
@@ -81,6 +155,41 @@ class _DeliverySchedulePageState extends State<DeliverySchedulePage> {
     return date.year == now.year &&
         date.month == now.month &&
         date.day == now.day;
+  }
+
+  // Get available time slots for a specific date
+  List<String> _getAvailableTimeSlotsForDate(DateTime date) {
+    final now = DateTime.now();
+    final isToday = _isToday(date);
+    
+    // If selected date is in the future, show all time slots
+    if (!isToday) {
+      return _allTimeSlots;
+    }
+    
+    // If today, filter out past time slots
+    final currentHour = now.hour;
+    final currentMinute = now.minute;
+    
+    return _allTimeSlots.where((slot) {
+      // Extract start hour from time slot
+      final startTimeStr = slot.split(' - ')[0];
+      final slotHour = _parseTimeTo24Hour(startTimeStr);
+      
+      // If slot hour is greater than current hour, it's available
+      if (slotHour > currentHour) {
+        return true;
+      }
+      
+      // If slot hour equals current hour, check minutes
+      if (slotHour == currentHour) {
+        final minutesMatch = RegExp(r':(\d+)').firstMatch(startTimeStr);
+        final slotMinutes = minutesMatch != null ? int.parse(minutesMatch.group(1)!) : 0;
+        return slotMinutes > currentMinute;
+      }
+      
+      return false;
+    }).toList();
   }
 
   @override
@@ -180,6 +289,13 @@ class _DeliverySchedulePageState extends State<DeliverySchedulePage> {
                           onTap: () {
                             setState(() {
                               _selectedDate = date;
+                              // Clear selected time slot if it becomes unavailable
+                              if (_selectedTimeSlot != null) {
+                                final availableSlots = _getAvailableTimeSlotsForDate(date);
+                                if (!availableSlots.contains(_selectedTimeSlot)) {
+                                  _selectedTimeSlot = null;
+                                }
+                              }
                             });
                           },
                           child: Container(
@@ -322,7 +438,34 @@ class _DeliverySchedulePageState extends State<DeliverySchedulePage> {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  ..._timeSlots.map((slot) {
+                  // Show message if no time slots available for today
+                  if (_isToday(_selectedDate ?? DateTime.now()) && _availableTimeSlots.isEmpty)
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.orange[50],
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.orange[200]!),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.info_outline, color: Colors.orange[700], size: 24),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              "No more delivery slots available for today. Please select tomorrow or later.",
+                              style: TextStyle(
+                                color: Colors.orange[900],
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ..._availableTimeSlots.map((slot) {
                     final isSelected = _selectedTimeSlot == slot;
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
@@ -424,14 +567,29 @@ class _DeliverySchedulePageState extends State<DeliverySchedulePage> {
                   child: InkWell(
                     onTap: () {
                       if (_selectedDate != null && _selectedTimeSlot != null) {
+                        // Double check that selected time slot is still available
+                        final availableSlots = _getAvailableTimeSlotsForDate(_selectedDate!);
+                        if (!availableSlots.contains(_selectedTimeSlot)) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Selected time slot is no longer available. Please select another time."),
+                              backgroundColor: Colors.red,
+                              duration: Duration(seconds: 3),
+                            ),
+                          );
+                          return;
+                        }
+                        
                         Navigator.pop(context, {
                           'date': _selectedDate,
                           'timeSlot': _selectedTimeSlot,
                         });
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Please select both date and time"),
+                          SnackBar(
+                            content: Text(_availableTimeSlots.isEmpty && _isToday(_selectedDate ?? DateTime.now())
+                                ? "No delivery slots available for today. Please select another date."
+                                : "Please select both date and time"),
                             backgroundColor: Colors.orange,
                           ),
                         );
@@ -458,4 +616,6 @@ class _DeliverySchedulePageState extends State<DeliverySchedulePage> {
     );
   }
 }
+
+
 

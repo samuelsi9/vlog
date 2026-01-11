@@ -8,6 +8,7 @@ import 'package:vlog/presentation/auth/reset_password_page.dart';
 import 'package:vlog/Utils/wishlist_service.dart';
 import 'package:vlog/Utils/cart_service.dart';
 import 'package:vlog/Utils/delivery_tracking_service.dart';
+import 'package:vlog/Utils/order_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vlog/presentation/skeleton_loader.dart';
 
@@ -124,6 +125,7 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => WishlistService()),
         ChangeNotifierProvider(create: (_) => CartService()),
         ChangeNotifierProvider(create: (_) => DeliveryTrackingService()),
+        ChangeNotifierProvider(create: (_) => OrderService()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
