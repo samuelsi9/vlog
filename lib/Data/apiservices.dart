@@ -1,15 +1,47 @@
 // services/auth_service.dart
 import 'package:dio/dio.dart';
+import 'package:vlog/Utils/storage_service.dart';
 
 class AuthService {
   final Dio _dio = Dio(
     BaseOptions(
-      baseUrl: 'https://fivekl-backend.onrender.com', // Change to your base URL
+      baseUrl: 'http://127.0.0.1:8000', // Change to your base URL
       headers: {'Accept': 'application/json'},
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
     ),
   );
+
+  AuthService() {
+    // Add interceptor to automatically include token in headers
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          // Get token from secure storage
+          final token = await StorageService.getToken();
+          final tokenType = await StorageService.getTokenType();
+
+          // Add Authorization header if token exists
+          if (token != null && token.isNotEmpty) {
+            final authHeader = tokenType != null
+                ? '$tokenType $token'
+                : 'Bearer $token';
+            options.headers['Authorization'] = authHeader;
+          }
+
+          return handler.next(options);
+        },
+        onError: (error, handler) async {
+          // Handle 401 unauthorized - token might be expired
+          if (error.response?.statusCode == 401) {
+            // Clear stored token on unauthorized
+            await StorageService.clearAll();
+          }
+          return handler.next(error);
+        },
+      ),
+    );
+  }
 
   String get baseUrl => _dio.options.baseUrl;
 
@@ -53,13 +85,29 @@ class AuthService {
   }) async {
     try {
       final response = await _dio.post(
-        '/api/auth/login',
+        '/api/login',
         data: {'email': email, 'password': password},
       );
 
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
-        return data; // { token, user }
+
+        // Extract token and user data from response
+        final accessToken = data['access_token'] as String?;
+        final tokenType = data['token_type'] as String? ?? 'Bearer';
+        final user = data['user'] as Map<String, dynamic>?;
+
+        // Save token and user data to secure storage
+        if (accessToken != null && accessToken.isNotEmpty) {
+          await StorageService.saveToken(accessToken);
+          await StorageService.saveTokenType(tokenType);
+
+          if (user != null) {
+            await StorageService.saveUser(user);
+          }
+        }
+
+        return data; // { access_token, token_type, user }
       }
     } on DioException catch (e) {
       print('Login failed: ${e.response?.data}');
@@ -118,14 +166,23 @@ class AuthService {
     return {};
   }
 
-  Future<String> logout({required String resetToken}) async {
+  Future<String> logout() async {
     try {
-      await _dio.post(
-        'api/auth/logout',
-        data: {'resetToken': resetToken},
-      );
-      return "Logged successfully";
+      // Token will be automatically included via interceptor
+      await _dio.post('/api/logout');
+
+      // Clear stored token and user data after successful logout
+      await StorageService.clearAll();
+
+      return "Logged out successfully";
+    } on DioException catch (e) {
+      // Even if logout fails on server, clear local storage
+      await StorageService.clearAll();
+      print('Logout failed: ${e.response?.data}');
+      rethrow;
     } catch (e) {
+      // Even if logout fails, clear local storage
+      await StorageService.clearAll();
       print('Unexpected error during logout: $e');
       rethrow;
     }
